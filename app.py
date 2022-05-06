@@ -12,7 +12,6 @@ from streamlit_drawable_canvas import st_canvas
 from Video import VideoStream
 st.set_page_config(page_title="Mouse behaviour analysis", layout="wide")
 
-
 # add styling
 # with open('style.css') as f:
 #     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
@@ -22,13 +21,11 @@ drawing_mode = st.sidebar.selectbox("Drawing tool:", ("rect", "circle", "transfo
 
 f = st.sidebar.file_uploader("Upload video:", type=["mp4"])
 first_image = None
-img_height, image_width = 500, 1000
 if f:
     t_file = tempfile.NamedTemporaryFile(delete=False)
     t_file.write(f.read())
     video = cv2.VideoCapture(t_file.name)
     ret, first_image = video.read()
-    img_height, image_width = first_image.shape[0]//2, first_image.shape[1]//2
     # canvas needs pil image
     first_image = cv2.cvtColor(first_image, cv2.COLOR_BGR2RGB)
     first_image = Image.fromarray(first_image)
@@ -40,15 +37,12 @@ canvas_result = st_canvas(
     stroke_color="#FF0000",
     background_image=first_image,
     update_streamlit=True,
-    height=500,
-    width=900,
+    height=1080,
+    width=1920,
     drawing_mode=drawing_mode,
-    key="canvas",
-)
+    key="canvas")
 
-# _, start_layout = st.columns([10, 1])
 start_btn = st.button("Start")
-
 
 if canvas_result.json_data is not None:
     objects = pd.json_normalize(canvas_result.json_data["objects"])  # need to convert obj to str because PyArrow
@@ -57,26 +51,22 @@ if canvas_result.json_data is not None:
     st.dataframe(objects)
 
 if f:
-    st_video = open(t_file.name, 'rb')
-    video_bytes = st_video.read()
+    # st_video = open(t_file.name, 'rb')
+    # video_bytes = st_video.read()
     # st.video(video_bytes)
 
     width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
     frames_per_second = video.get(cv2.CAP_PROP_FPS)
     num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-    print(width, height, frames_per_second, num_frames)
-
 
 if start_btn:
-    print("*** video stream created ***")
     video_stream = VideoStream(t_file.name)
     video_stream.start()
 
     img_placeholder = st.empty()
 
-    keypoint_x = 100
-    keypoint_y = 100
+    keypoint_x, keypoint_y = 100, 100
     while not video_stream.stopped():
         # Camera detection loop
         frame = video_stream.read()
@@ -86,16 +76,21 @@ if start_btn:
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image_pil = Image.fromarray(np.uint8(frame)).convert('RGB')
-        draw = ImageDraw.Draw(image_pil)
+        draw = ImageDraw.Draw(image_pil, "RGBA")
         draw.ellipse([(keypoint_x - 10, keypoint_y - 10),
                       (keypoint_x + 10, keypoint_y + 10)],
                      outline="red", fill="red")
         keypoint_x += 20
 
         # Display the image with the detections in the Streamlit app
+        # draw = ImageDraw.Draw(image_pil)
+
+        draw.ellipse([(objects["left"], objects["top"]),
+                      (objects["left"] + 2*objects["radius"],  objects["top"] + 2*objects["radius"])],
+                     outline="red", fill=(255, 178, 102, 100), width=4)
+
         np.copyto(frame, np.array(image_pil))
         img_placeholder.image(image_pil)
 
     cv2.destroyAllWindows()
     video_stream.stop()
-    print("*** video stream stopped ***")
