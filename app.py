@@ -3,8 +3,10 @@ import tempfile
 import numpy as np
 import pandas as pd
 
+from io import BytesIO
 from PIL import Image
 import PIL.ImageDraw as ImageDraw
+import matplotlib.pyplot as plt
 
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
@@ -30,6 +32,12 @@ if f:
     first_image = cv2.cvtColor(first_image, cv2.COLOR_BGR2RGB)
     first_image = Image.fromarray(first_image)
 
+    # if we need that
+    width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    frames_per_second = video.get(cv2.CAP_PROP_FPS)
+    num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+
 # Create a canvas component
 canvas_result = st_canvas(
     fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
@@ -49,16 +57,6 @@ if canvas_result.json_data is not None:
     for col in objects.select_dtypes(include=['object']).columns:
         objects[col] = objects[col].astype("str")
     st.dataframe(objects)
-
-if f:
-    # st_video = open(t_file.name, 'rb')
-    # video_bytes = st_video.read()
-    # st.video(video_bytes)
-
-    width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    frames_per_second = video.get(cv2.CAP_PROP_FPS)
-    num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
 if start_btn:
     video_stream = VideoStream(t_file.name)
@@ -82,9 +80,6 @@ if start_btn:
                      outline="red", fill="red")
         keypoint_x += 20
 
-        # Display the image with the detections in the Streamlit app
-        # draw = ImageDraw.Draw(image_pil)
-
         draw.ellipse([(objects["left"], objects["top"]),
                       (objects["left"] + 2*objects["radius"],  objects["top"] + 2*objects["radius"])],
                      outline="red", fill=(255, 178, 102, 100), width=4)
@@ -94,3 +89,15 @@ if start_btn:
 
     cv2.destroyAllWindows()
     video_stream.stop()
+
+    left_plot, right_plot = st.columns([5, 5])
+
+    arr = np.random.normal(1, 1, size=100)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.hist(arr, bins=20)
+
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    left_plot.image(buf)
+
+    right_plot.image(buf)
