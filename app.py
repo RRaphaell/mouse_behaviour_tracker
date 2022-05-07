@@ -5,24 +5,22 @@ import pandas as pd
 
 from io import BytesIO
 from PIL import Image
-import PIL.ImageDraw as ImageDraw
 import matplotlib.pyplot as plt
 
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 
 from Video import VideoStream
-st.set_page_config(page_title="Mouse behaviour analysis", layout="wide")
-
-# add styling
-# with open('style.css') as f:
-#     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+from Tracker import Tracker
+from config import SEGMENTS
+st.set_page_config(page_title="Mouse behaviour analysis")
 
 # Specify canvas parameters in application
 drawing_mode = st.sidebar.selectbox("Drawing tool:", ("rect", "circle", "transform"))
 
 f = st.sidebar.file_uploader("Upload video:", type=["mp4"])
 first_image = None
+height, width = 400, 1000
 if f:
     t_file = tempfile.NamedTemporaryFile(delete=False)
     t_file.write(f.read())
@@ -40,15 +38,15 @@ if f:
 
 # Create a canvas component
 canvas_result = st_canvas(
-    fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
-    stroke_width=3,
-    stroke_color="#FF0000",
+    fill_color=SEGMENTS.fill_color,  # Fixed fill color with some opacity
+    stroke_width=SEGMENTS.stroke_width,
+    stroke_color=SEGMENTS.stroke_color,
     background_image=first_image,
     update_streamlit=True,
-    height=1080,
-    width=1920,
+    height=396.1,
+    width=704,
     drawing_mode=drawing_mode,
-    key="canvas")
+    key=str(hash(str(height)+str(width))))
 
 start_btn = st.button("Start")
 
@@ -63,8 +61,8 @@ if start_btn:
     video_stream.start()
 
     img_placeholder = st.empty()
+    tracker = Tracker(objects, img_placeholder)
 
-    keypoint_x, keypoint_y = 100, 100
     while not video_stream.stopped():
         # Camera detection loop
         frame = video_stream.read()
@@ -72,20 +70,7 @@ if start_btn:
             print("Frame stream interrupted")
             break
 
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image_pil = Image.fromarray(np.uint8(frame)).convert('RGB')
-        draw = ImageDraw.Draw(image_pil, "RGBA")
-        draw.ellipse([(keypoint_x - 10, keypoint_y - 10),
-                      (keypoint_x + 10, keypoint_y + 10)],
-                     outline="red", fill="red")
-        keypoint_x += 20
-
-        draw.ellipse([(objects["left"], objects["top"]),
-                      (objects["left"] + 2*objects["radius"],  objects["top"] + 2*objects["radius"])],
-                     outline="red", fill=(255, 178, 102, 100), width=4)
-
-        np.copyto(frame, np.array(image_pil))
-        img_placeholder.image(image_pil)
+        tracker.draw_predictions(frame)
 
     cv2.destroyAllWindows()
     video_stream.stop()
