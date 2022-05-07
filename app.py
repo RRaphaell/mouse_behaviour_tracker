@@ -1,26 +1,23 @@
 import cv2
 import tempfile
-import numpy as np
 import pandas as pd
-
-from io import BytesIO
 from PIL import Image
-import matplotlib.pyplot as plt
 
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 
 from Video import VideoStream
 from Tracker import Tracker
+from Analyzer import get_dummy_plots
 from config import SEGMENTS
 st.set_page_config(page_title="Mouse behaviour analysis")
+
 
 # Specify canvas parameters in application
 drawing_mode = st.sidebar.selectbox("Drawing tool:", ("rect", "circle", "transform"))
 
 f = st.sidebar.file_uploader("Upload video:", type=["mp4"])
 first_image = None
-height, width = 400, 1000
 if f:
     t_file = tempfile.NamedTemporaryFile(delete=False)
     t_file.write(f.read())
@@ -36,6 +33,7 @@ if f:
     frames_per_second = video.get(cv2.CAP_PROP_FPS)
     num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
+
 # Create a canvas component
 canvas_result = st_canvas(
     fill_color=SEGMENTS.fill_color,  # Fixed fill color with some opacity
@@ -43,10 +41,11 @@ canvas_result = st_canvas(
     stroke_color=SEGMENTS.stroke_color,
     background_image=first_image,
     update_streamlit=True,
-    height=396.1,
+    height=396,
     width=704,
     drawing_mode=drawing_mode,
-    key=str(hash(str(height)+str(width))))
+    key="canvas")
+
 
 start_btn = st.button("Start")
 
@@ -55,6 +54,7 @@ if canvas_result.json_data is not None:
     for col in objects.select_dtypes(include=['object']).columns:
         objects[col] = objects[col].astype("str")
     st.dataframe(objects)
+
 
 if start_btn:
     video_stream = VideoStream(t_file.name)
@@ -67,7 +67,6 @@ if start_btn:
         # Camera detection loop
         frame = video_stream.read()
         if frame is None:
-            print("Frame stream interrupted")
             break
 
         tracker.draw_predictions(frame)
@@ -76,13 +75,6 @@ if start_btn:
     video_stream.stop()
 
     left_plot, right_plot = st.columns([5, 5])
-
-    arr = np.random.normal(1, 1, size=100)
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.hist(arr, bins=20)
-
-    buf = BytesIO()
-    fig.savefig(buf, format="png")
+    buf = get_dummy_plots()
     left_plot.image(buf)
-
     right_plot.image(buf)

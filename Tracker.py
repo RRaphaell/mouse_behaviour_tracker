@@ -14,7 +14,7 @@ class Tracker:
 
     # dummy function until model is ready
     def _predict_keypoints(self):
-        self.x += 10
+        self.x += 5
         return self.x, 100
 
     def _draw_keypoints(self, draw):
