@@ -1,13 +1,20 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from io import BytesIO
+import streamlit as st
+import PIL.ImageDraw as ImageDraw
+from config import KEYPOINT
 
 
-def get_dummy_plots():
-    arr = np.random.normal(1, 1, size=100)
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.hist(arr, bins=20)
+class Analyzer:
+    def __init__(self):
+        st.markdown("<h3 style='text-align: center; color: #FFB266;'>Behavior report</h3>", unsafe_allow_html=True)
+        self.img_placeholder = st.empty()
 
-    buf = BytesIO()
-    fig.savefig(buf, format="png")
-    return buf
+    def draw_tracked_road(self, predictions, image_pil):
+        image_pil = image_pil.resize((704, 396))
+        draw = ImageDraw.Draw(image_pil, "RGBA")
+
+        for keypoint_x, keypoint_y in predictions:
+            draw.ellipse([(keypoint_x - KEYPOINT.radius, keypoint_y - KEYPOINT.radius),
+                          (keypoint_x + KEYPOINT.radius, keypoint_y + KEYPOINT.radius)],
+                         outline=KEYPOINT.outline, fill=KEYPOINT.fill)
+
+        self.img_placeholder.image(image_pil)

@@ -5,7 +5,7 @@ import threading
 
 class VideoStream:
     # Opens a video with OpenCV from file in a thread
-    def __init__(self, src, name="VideoStream", real_time=True):
+    def __init__(self, video, name="VideoStream", real_time=True):
         """Initialize the video stream from a video
         Args:
             src (str): Video file to process.
@@ -24,7 +24,7 @@ class VideoStream:
             _stop_event (threading.Event): Event used to gently stop the thread.
         """
         self.name = name
-        self.stream = cv2.VideoCapture(src)
+        self.stream = video
         self.real_time = real_time
         self.frame_rate = self.stream.get(cv2.CAP_PROP_FPS)
         self.grabbed, self.frame = self.stream.read()
@@ -37,7 +37,7 @@ class VideoStream:
         return self
 
     def update(self):
-        # Continuosly iterate through the video stream until stopped
+        # Continuously iterate through the video stream until stopped
         while self.stream.isOpened():
             if not self.stopped():
                 if self.real_time:

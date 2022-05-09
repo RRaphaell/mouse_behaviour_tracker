@@ -6,6 +6,6 @@ class SEGMENTS:
 
 
 class KEYPOINT:
-    radius = 10
+    radius = 5
     fill = "red"
     outline = "red"
