@@ -3,8 +3,8 @@ import numpy as np
 from PIL import Image
 import PIL.ImageDraw as ImageDraw
 import streamlit as st
-from Model import Model
-from config import KEYPOINT, SEGMENTS
+from scripts.Model import Model
+from scripts.config import KEYPOINT, SEGMENTS
 
 
 class Tracker:

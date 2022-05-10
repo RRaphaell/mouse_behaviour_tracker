@@ -1,6 +1,6 @@
 import streamlit as st
 import PIL.ImageDraw as ImageDraw
-from config import KEYPOINT
+from scripts.config import KEYPOINT
 
 
 class Analyzer:

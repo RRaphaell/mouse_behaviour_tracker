@@ -1,7 +1,7 @@
 import cv2
-from Video import VideoStream
-from Tracker import Tracker
-from Analyzer import Analyzer
+from scripts.Video import VideoStream
+from scripts.Tracker import Tracker
+from scripts.Analyzer import Analyzer
 
 
 class Pipeline:

@@ -1,12 +1,16 @@
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
-from Pipeline import Pipeline
-from config import SEGMENTS
-from utils import show_canvas_info, read_video
+from scripts.Pipeline import Pipeline
+from scripts.config import SEGMENTS
+from scripts.utils import show_canvas_info, read_video
 
 
 st.set_page_config(page_title="Mouse behavior analysis")
 st.markdown("<h1 style='text-align: center; color: #FF8000;'>Mouse behavior analysis </h1>", unsafe_allow_html=True)
+
+# # add styling
+# with open('style.css') as f:
+#     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # Specify canvas parameters in application
 drawing_mode = st.sidebar.selectbox("Drawing tool:", ("rect", "circle", "transform"))
