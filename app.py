@@ -28,10 +28,9 @@ canvas_result = st_canvas(
 
 start_btn = st.button("Start")
 objects = show_canvas_info(canvas_result)
-
 if start_btn:
     if not video:
-        st.warning("Please upload video first!")
+        st.warning("Please upload video first!")    # if user did not upload a video
     else:
         pipeline = Pipeline(video, objects, first_image)
         pipeline.run()

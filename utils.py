@@ -6,6 +6,17 @@ from PIL import Image
 
 
 def show_canvas_info(canvas_result):
+    """
+    creates dataframe object from segments drawn on the canvas.
+    each row is a segment information such as coordinates, radius etc.
+
+    Args:
+        canvas_result (streamlit_drawable_canvas): Streamlit drawable canvas to track all drawing segments
+
+    Returns:
+        pd.DataFrame: dataframe containing segment information
+    """
+
     objects = pd.DataFrame()
     if canvas_result.json_data is not None:
         objects = pd.json_normalize(canvas_result.json_data["objects"])  # need to convert obj to str because PyArrow
@@ -22,6 +33,17 @@ def show_canvas_info(canvas_result):
 
 
 def read_video(file):
+    """
+    create cv2 video object from uploaded file
+
+    Args:
+        file (streamlit.UploadedFile): uploaded mp4 file
+
+    Returns:
+        cv2.VideoCapture: cv2 video object
+        np.ndarray: first image of the video
+    """
+
     video, first_image = None, None
 
     if file:

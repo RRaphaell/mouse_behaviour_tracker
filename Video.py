@@ -4,25 +4,33 @@ import threading
 
 
 class VideoStream:
+    """
+    this class creates video stream from video object, reads frame by frame in thread
+
+    Attributes:
+        name (str, default='VideoStream'): Name for the thread.
+        stream (cv2.VideoCapture): Video file stream.
+        real_time (bool, default='True'): Defines if the video is going to
+            be read at full speed or adjusted to the original frame rate.
+        frame_rate (float): Frame rate of the video.
+        grabbed (bool): Tells if the current frame's been correctly read.
+        frame (nparray): OpenCV image containing the current frame.
+        lock (_thread.lock): Lock to avoid race condition.
+        _stop_event (threading.Event): Event used to gently stop the thread.
+    """
+
     # Opens a video with OpenCV from file in a thread
     def __init__(self, video, name="VideoStream", real_time=True):
-        """Initialize the video stream from a video
-        Args:
-            src (str): Video file to process.
-            name (str, default='VideoStream'): Name for the thread.
-            real_time (bool, default='True'): Defines if the video is going to
-                be read at full speed or adjusted to the original frame rate.
-        Attributes:
-            name (str, default='VideoStream'): Name for the thread.
-            stream (cv2.VideoCapture): Video file stream.
-            real_time (bool, default='True'): Defines if the video is going to
-                be read at full speed or adjusted to the original frame rate.
-            frame_rate (float): Frame rate of the video.
-            grabbed (bool): Tells if the current frame's been correctly read.
-            frame (nparray): OpenCV image containing the current frame.
-            lock (_thread.lock): Lock to avoid race condition.
-            _stop_event (threading.Event): Event used to gently stop the thread.
         """
+        Initialize the video stream from a video object
+
+        Args:
+            video (cv2.VideoCapture): Video file to process.
+            name (str, default='VideoStream'): Name for the thread.
+            real_time (bool, default='True'): Defines if the video is going to
+                be read at full speed or adjusted to the original frame rate.
+        """
+
         self.name = name
         self.stream = video
         self.real_time = real_time

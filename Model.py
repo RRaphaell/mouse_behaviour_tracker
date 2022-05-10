@@ -1,3 +1,7 @@
+"""
+dummy temporary model
+"""
+
 from random import randint
 
 
