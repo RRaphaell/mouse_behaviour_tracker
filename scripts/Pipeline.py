@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 from scripts.Video import VideoStream
 from scripts.Tracker import Tracker
 from scripts.Analyzer import Analyzer
@@ -43,8 +44,10 @@ class Pipeline:
             self.tracker.draw_predictions(frame)
             predictions = self.tracker.get_predictions()
 
+        predictions = np.array(predictions)
         self.analyzer.draw_tracked_road(predictions)
         self.analyzer.show_elapsed_time_in_segments(predictions)
+        self.analyzer.show_n_crossing_in_segments(predictions)
 
         cv2.destroyAllWindows()
         self.video_stream.stop()
