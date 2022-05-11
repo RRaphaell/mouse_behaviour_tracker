@@ -6,7 +6,11 @@ import PIL.ImageDraw as ImageDraw
 import matplotlib.pyplot as plt
 from scripts.config import KEYPOINT
 from scripts.utils import calculate_circle_center_cords
-plt.style.use('dark_background')
+
+plt.rcParams.update({
+    "axes.facecolor":    (0.054, 0.066, 0.090, 1.0),  # same as streamlit dark style color
+    "savefig.facecolor": (0.054, 0.066, 0.090, 1.0),  # same as streamlit dark style color
+})
 
 
 class Analyzer:
@@ -84,11 +88,21 @@ class Analyzer:
         self.count_elapsed_time_in_segments(predictions)
         st.dataframe(self.segments_df[["type", "elapsed_n_frames", "elapsed_sec", "elapsed_sec%"]])
 
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.grid(False)
-        ax.tick_params(labelsize=12)
-        ax.set_title("elapsed time percentage in segments", fontsize=16)
-        ax.bar(self.segments_df["type"], self.segments_df["elapsed_sec%"], color=["orange"])
+        fig, ax = plt.subplots(figsize=(8, 6), facecolor='blue')
+        ax.set_title("elapsed time percentage in segments", fontsize=16, color="#FFB266")
+        bars = plt.bar(self.segments_df["type"], self.segments_df["elapsed_sec%"], color=["orange"])
+
+        # # get rid of the frame
+        for spine in plt.gca().spines.values():
+            spine.set_visible(False)
+
+        # add value on top off the bar
+        for b in bars:
+            height = b.get_height()
+            plt.gca().text(b.get_x() + b.get_width() / 2, b.get_height() - 3, str(int(height)),
+                           ha='center', color='white', fontsize=20)
+        # remove ticks
+        ax.tick_params(top=False, bottom=False, left=False, right=False, labelleft=False, labelbottom=True, labelsize=12)
 
         buf = BytesIO()
         fig.savefig(buf, format="png")
