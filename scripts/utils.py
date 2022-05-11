@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import pandas as pd
 import tempfile
 import streamlit as st
@@ -56,4 +57,10 @@ def read_video(file):
         first_image = Image.fromarray(first_image)
 
     return video, first_image
+
+
+def calculate_circle_center_cords(segment):
+    center_x = segment["left"] + segment["radius"] * np.cos(np.deg2rad(segment["angle"]))
+    center_y = segment["top"] + segment["radius"] * np.sin(np.deg2rad(segment["angle"]))
+    return center_x, center_y
 
