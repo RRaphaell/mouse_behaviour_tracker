@@ -28,7 +28,7 @@ class Pipeline:
 
         self.video_stream = VideoStream(video)
         self.tracker = Tracker(segments_df)
-        self.analyzer = Analyzer(first_image)
+        self.analyzer = Analyzer(video, segments_df, first_image)
         self.first_image = first_image
 
     def run(self):
@@ -44,6 +44,7 @@ class Pipeline:
             predictions = self.tracker.get_predictions()
 
         self.analyzer.draw_tracked_road(predictions)
+        self.analyzer.show_elapsed_time_in_segments(predictions)
 
         cv2.destroyAllWindows()
         self.video_stream.stop()

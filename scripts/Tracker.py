@@ -60,8 +60,6 @@ class Tracker:
                                 (segment["left"] + segment["width"], segment["top"] + segment["height"])],
                                outline=SEGMENTS.stroke_color, fill=SEGMENTS.fill, width=SEGMENTS.stroke_width)
             else:
-                # center_x = segment["left"] + segment["radius"] * np.cos(np.deg2rad(segment["angle"]))
-                # center_y = segment["top"] + segment["radius"] * np.sin(np.deg2rad(segment["angle"]))
                 center_x, center_y = calculate_circle_center_cords(segment)
                 draw.ellipse([(center_x - segment["radius"], center_y - segment["radius"]),
                               (center_x + segment["radius"], center_y + segment["radius"])],
