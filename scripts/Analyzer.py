@@ -4,8 +4,8 @@ from io import BytesIO
 import streamlit as st
 import PIL.ImageDraw as ImageDraw
 import matplotlib.pyplot as plt
-from scripts.config import KEYPOINT
-from scripts.utils import calculate_circle_center_cords
+from scripts.config import KEYPOINT, CANVAS
+from scripts.utils import calculate_circle_center_cords, rgba_0_255_to_0_1
 
 plt.rcParams.update({
     "axes.facecolor":    (0.054, 0.066, 0.090, 1.0),  # same as streamlit dark style color
@@ -24,7 +24,7 @@ class Analyzer:
         frames_per_second (float): number of frames per second
     """
 
-    def __init__(self, video, segments_df, first_image):
+    def __init__(self, video, segments_df, first_image, segment_colors):
         """
         initialize analyzer class with streamlit widgets and markdowns
 
@@ -32,19 +32,23 @@ class Analyzer:
             video (cv2.VideoCapture): Video file to process.
             segments_df (pd.Dataframe): dataframe of segments information
             first_image (np.ndarray): first image of the video. Used as background for canvas and results placed on that also
+            segment_colors (dict[str, list[float]]): color for each unique segment
         """
 
-        st.markdown("<h3 style='text-align: center; color: #FFB266;'>Behavior report</h3>", unsafe_allow_html=True)
-        self.img_placeholder = st.empty()
+        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
+        self.col1, self.col2, self.col3 = st.columns(3)
+
+        self.img_placeholder = self.col1.empty()
 
         self.segments_df = segments_df
         self.first_image = first_image
         self.num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
         self.frames_per_second = video.get(cv2.CAP_PROP_FPS)
+        self.segment_colors = segment_colors
 
     def draw_tracked_road(self, predictions):
         """Draw the entire route covered by the mouse"""
-        self.first_image = self.first_image.resize((704, 396))
+        self.first_image = self.first_image.resize((CANVAS.width, CANVAS.height))
         draw = ImageDraw.Draw(self.first_image, "RGBA")
 
         for keypoint_x, keypoint_y in predictions:
@@ -83,11 +87,11 @@ class Analyzer:
         self.segments_df['elapsed_sec%'] = self.segments_df['elapsed_n_frames'].apply(
             lambda n_frames: n_frames/self.num_frames*100)
 
-    def _plot_bars(self, x_col, height_col, title):
+    def _plot_bars(self, x, y, title):
         fig, ax = plt.subplots(figsize=(8, 6))
-        bars = plt.bar(self.segments_df[x_col], self.segments_df[height_col], color=["orange"])
+        bars = plt.bar(x, y, color=rgba_0_255_to_0_1(self.segment_colors.values()))
 
-        ax.set_title(title, fontsize=16, color="#FFB266", pad=20)
+        ax.set_title(title, fontsize=18, color="white", pad=20)
         # # get rid of the frame
         for spine in plt.gca().spines.values():
             spine.set_visible(False)
@@ -98,8 +102,8 @@ class Analyzer:
             plt.gca().text(b.get_x() + b.get_width() / 2, b.get_height(), str(int(height)),
                            ha='center', color='white', fontsize=20)
         # remove ticks
-        ax.tick_params(axis='x', colors='orange')
-        ax.tick_params(top=False, bottom=True, left=False, right=False, labelleft=False, labelbottom=True, labelsize=12)
+        ax.tick_params(axis='x', colors='white', rotation=45 if len(x) > 5 else 0)
+        ax.tick_params(top=False, bottom=True, left=False, right=False, labelleft=False, labelbottom=True, labelsize=16)
 
         buf = BytesIO()
         fig.savefig(buf, format="png")
@@ -109,11 +113,17 @@ class Analyzer:
         """count elapsed time in each segment and plot bars"""
 
         self._count_elapsed_time_in_segments(predictions)
-        st.dataframe(self.segments_df[["type", "elapsed_n_frames", "elapsed_sec", "elapsed_sec%"]])
 
-        self._plot_bars(x_col="type",
-                        height_col="elapsed_sec%",
-                        title="elapsed time percentage in segments")
+        # sum up values for same segments
+        self.segments_df["elapsed_sec%"] = self.segments_df.groupby('segment key')["elapsed_sec%"].transform('sum')
+        df = self.segments_df.drop_duplicates(subset=['segment key', 'elapsed_sec%'])
+
+        with self.col2:
+            self._plot_bars(x=[f"seg-{i}" for i in df["segment key"]],
+                            y=df["elapsed_sec%"],
+                            title="elapsed time(%)")
+
+            # self.col2.dataframe(self.segments_df[["type", "elapsed_n_frames", "elapsed_sec", "elapsed_sec%"]])
 
     def show_n_crossing_in_segments(self, predictions):
         """count number of crossing in each segment and plot bars"""
@@ -121,6 +131,11 @@ class Analyzer:
         self.segments_df['n_crossing'] = self.segments_df.apply(
             lambda segment: sum(np.diff(self._count_elapsed_n_frames(segment, predictions))), axis=1)
 
-        self._plot_bars(x_col="type",
-                        height_col="n_crossing",
-                        title="number of crossings in segments")
+        # sum up values for same segments
+        self.segments_df["n_crossing"] = self.segments_df.groupby('segment key')["n_crossing"].transform('sum')
+        df = self.segments_df.drop_duplicates(subset=['segment key', 'n_crossing'])
+
+        with self.col3:
+            self._plot_bars(x=[f"seg-{i}" for i in df["segment key"]],
+                            y=df["n_crossing"],
+                            title="number of crossings")

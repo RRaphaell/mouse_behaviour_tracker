@@ -25,6 +25,7 @@ class Tracker:
 
         Args:
             segments_df (pd.DataFrame): each row is a segment information such as coordinates, radius etc.
+            segment_colors (dict[str, list[float]]): color for each unique segment
         """
 
         st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
