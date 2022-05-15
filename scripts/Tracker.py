@@ -4,7 +4,7 @@ from PIL import Image
 import PIL.ImageDraw as ImageDraw
 import streamlit as st
 from scripts.Model import Model
-from scripts.config import KEYPOINT, SEGMENTS
+from scripts.config import KEYPOINT, SEGMENTS, CANVAS
 from scripts.utils import calculate_circle_center_cords
 
 
@@ -19,7 +19,7 @@ class Tracker:
         predictions (list): list of all prediction coordinates
     """
 
-    def __init__(self, segments_df):
+    def __init__(self, segments_df, segment_colors):
         """
         initialize tracker class with streamlit widgets and markdowns
 
@@ -27,12 +27,14 @@ class Tracker:
             segments_df (pd.DataFrame): each row is a segment information such as coordinates, radius etc.
         """
 
-        st.markdown("<h3 style='text-align: center; color: #FFB266;'>Video streaming</h3>", unsafe_allow_html=True)
-        predictions_img_placeholder = st.empty()
+        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
+        _, col2, _ = st.columns([1, 3, 1])
+        predictions_img_placeholder = col2.empty()
 
         self.model = Model()
         self.segments_df = segments_df
         self.img_placeholder = predictions_img_placeholder
+        self.segment_colors = segment_colors
         self.predictions = []
 
     def _predict_keypoints(self):
@@ -55,21 +57,23 @@ class Tracker:
             return
 
         for index, segment in self.segments_df.iterrows():
+            color = tuple(self.segment_colors[segment["segment key"]])  # color for each segment
+
             if segment["type"] == "rect":
                 draw.rectangle([(segment["left"], segment["top"]),
                                 (segment["left"] + segment["width"], segment["top"] + segment["height"])],
-                               outline=SEGMENTS.stroke_color, fill=SEGMENTS.fill, width=SEGMENTS.stroke_width)
+                               outline=SEGMENTS.stroke_color, fill=color, width=SEGMENTS.stroke_width)
             else:
                 center_x, center_y = calculate_circle_center_cords(segment)
                 draw.ellipse([(center_x - segment["radius"], center_y - segment["radius"]),
                               (center_x + segment["radius"], center_y + segment["radius"])],
-                             outline=SEGMENTS.stroke_color, fill=SEGMENTS.fill, width=SEGMENTS.stroke_width)
+                             outline=SEGMENTS.stroke_color, fill=color, width=SEGMENTS.stroke_width)
 
     def draw_predictions(self, frame):
         """draw all segments and predictions on video stream"""
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image_pil = Image.fromarray(np.uint8(frame)).convert('RGB')
-        image_pil = image_pil.resize((704, 396))
+        image_pil = image_pil.resize((CANVAS.width, CANVAS.height))
         draw = ImageDraw.Draw(image_pil, "RGBA")
 
         self._draw_keypoints(draw)
