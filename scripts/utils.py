@@ -5,7 +5,7 @@ import tempfile
 import streamlit as st
 from PIL import Image
 from st_aggrid import AgGrid    # for editable dataframe
-import matplotlib as plt
+from scripts.config import COLOR_PALETTE
 
 
 def show_canvas_info(canvas_result):
@@ -39,7 +39,7 @@ def show_canvas_info(canvas_result):
                 grid_options["columnDefs"] += [{"field": c, "editable": False} for c in visible_columns]
 
                 # streamlit doesn't have interactive dataframe so using agrid dataframe.
-                grid_return = AgGrid(objects, grid_options)
+                grid_return = AgGrid(objects, grid_options, theme='streamlit')
                 objects = grid_return["data"]
     return objects
 
@@ -89,10 +89,15 @@ def rgba_0_255_to_0_1(color_palette):
 
 def generate_segments_colors(segments_df):
     """generate different colors for each unique segments"""
-    color_palette = plt.cm.get_cmap("tab20", segments_df["segment key"].nunique()).colors  # color for each segment
-    color_palette = rgba_0_1_to_0_255(color_palette)
-    color_palette[:, -1] = 100  # add transparency
+    # color_palette = plt.cm.get_cmap("tab20", segments_df["segment key"].nunique()).colors  # color for each segment
+    # color_palette = rgba_0_1_to_0_255(color_palette)
+    # color_palette[:, -1] = 100  # add transparency
+    color_palette = np.array(COLOR_PALETTE)
+    transparency = np.full((color_palette.shape[0], 1), 150)  # transparency array
+    color_palette = np.append(color_palette, transparency, axis=1)  # add transparency to color_palette
     segment_colors = dict(zip(segments_df["segment key"].unique(), color_palette))
 
     return segment_colors
+
+
 
