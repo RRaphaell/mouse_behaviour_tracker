@@ -1,0 +1,40 @@
+.css-1v0mbdj {
+    margin: auto;
+}
+
+.css-rncmk8 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+[data-testId="stVerticalBlock"] div:nth-of-type(3)  {
+    -ms-overflow-style: none;
+    overflow-y: hidden; /* Hide vertical scrollbar */
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+}
+
+[data-testId="stVerticalBlock"] div:nth-of-type(3) iframe {
+        margin-left: 50%;
+        transform: translateX(-352px);
+}
+
+.e1s6o5jp0 ul {
+    width: 704px;
+    text-align: center;
+    margin: auto;
+}
+
+.stButton {
+    text-align: center;
+}
+
+.row-widget.stButton button  {
+    padding: 15px 60px;
+    font-size: 20px;
+    border-radius: 15px;
+}
+
+.CanvasToolbar_enabled__z-9Es {
+    filter: invert(100%);
+    background-color: red;
+}
