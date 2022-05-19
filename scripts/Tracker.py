@@ -29,8 +29,7 @@ class Tracker:
         """
 
         st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
-        _, col2, _ = st.columns([1, 3, 1])
-        predictions_img_placeholder = col2.empty()
+        predictions_img_placeholder = st.empty()
 
         self.model = Model()
         self.segments_df = segments_df
