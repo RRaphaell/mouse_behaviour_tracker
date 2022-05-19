@@ -4,6 +4,9 @@ from scripts.Video import VideoStream
 from scripts.Tracker import Tracker
 from scripts.Analyzer import Analyzer
 from scripts.utils import generate_segments_colors
+from scripts.Report import Bar, Card, Dashboard, Pie
+from types import SimpleNamespace
+from streamlit_elements import elements
 
 
 class Pipeline:
@@ -30,9 +33,16 @@ class Pipeline:
 
         segment_colors = generate_segments_colors(segments_df)
 
+        self.report = SimpleNamespace(
+            dashboard=Dashboard(),
+            n_crossing=Bar(0, 0, 6, 7, minW=3, minH=4),
+            time_spent=Pie(6, 0, 6, 7, minW=3, minH=4),
+            road_passed=Card(3, 7, 6, 7, minW=2, minH=4)
+        )
+
         self.video_stream = VideoStream(video)
         self.tracker = Tracker(segments_df, segment_colors)
-        self.analyzer = Analyzer(video, segments_df, first_image, segment_colors)
+        self.analyzer = Analyzer(video, segments_df, first_image, segment_colors, self.report)
         self.first_image = first_image
 
     def run(self):
@@ -45,10 +55,14 @@ class Pipeline:
 
             self.tracker.draw_predictions(frame)
             predictions = self.tracker.get_predictions()
+
         predictions = np.array(predictions)
-        self.analyzer.draw_tracked_road(predictions)
-        self.analyzer.show_elapsed_time_in_segments(predictions)
-        self.analyzer.show_n_crossing_in_segments(predictions)
+
+        with elements("demo"):
+            with self.report.dashboard(rowHeight=57):
+                self.analyzer.draw_tracked_road(predictions)
+                self.analyzer.show_elapsed_time_in_segments(predictions)
+                self.analyzer.show_n_crossing_in_segments(predictions)
 
         cv2.destroyAllWindows()
         self.video_stream.stop()
