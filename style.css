@@ -15,7 +15,18 @@
 
 [data-testId="stVerticalBlock"] div:nth-of-type(3) iframe {
         margin-left: 50%;
-        transform: translateX(-352px);
+        transform: translateX(-128px);
+}
+
+[data-testId="stVerticalBlock"] div:nth-of-type(8) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 256px;
+    height: 256px;
+
+    margin: auto;
 }
 
 .e1s6o5jp0 ul {
