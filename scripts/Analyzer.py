@@ -34,10 +34,7 @@ class Analyzer:
             segment_colors (dict[str, list[float]]): color for each unique segment
         """
 
-        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
         self.col1, self.col2, self.col3 = st.columns(3)
-
-        self.img_placeholder = self.col1.empty()
 
         self.segments_df = segments_df
         self.first_image = first_image
@@ -54,11 +51,9 @@ class Analyzer:
         for keypoint_x, keypoint_y in predictions:
             draw.ellipse([(keypoint_x - KEYPOINT.radius, keypoint_y - KEYPOINT.radius),
                           (keypoint_x + KEYPOINT.radius, keypoint_y + KEYPOINT.radius)],
-                         outline=KEYPOINT.outline, fill=KEYPOINT.fill)
+                         outline=KEYPOINT.outline[::-1], fill=KEYPOINT.fill[::-1])
 
         self.report.road_passed(self.first_image)
-
-        # self.img_placeholder.image(self.first_image)
 
     def _count_elapsed_n_frames(self, segment, predictions):
         """count quantity of frames when mouse is in segment"""
@@ -74,7 +69,6 @@ class Analyzer:
             # Compare radius of circle with distance of its center from given point
             is_in_segment = (x - circle_x) ** 2 + (y - circle_y) ** 2 <= rad ** 2
 
-        # in_segment = sum(is_in_segment)
         return is_in_segment
 
     def _count_elapsed_time_in_segments(self, predictions):
@@ -89,28 +83,6 @@ class Analyzer:
         self.segments_df['elapsed_sec%'] = self.segments_df['elapsed_n_frames'].apply(
             lambda n_frames: n_frames/self.num_frames*100)
 
-    # def _plot_bars(self, x, y, title):
-    #     fig, ax = plt.subplots(figsize=(7, 5))
-    #     bars = plt.bar(x, y, color=rgba_0_255_to_0_1(self.segment_colors.values()))
-    #
-    #     ax.set_title(title, fontsize=18, color="white", pad=15)
-    #     # # get rid of the frame
-    #     for spine in plt.gca().spines.values():
-    #         spine.set_visible(False)
-    #
-    #     # add value on top off the bar
-    #     for b in bars:
-    #         height = b.get_height()
-    #         plt.gca().text(b.get_x() + b.get_width() / 2, b.get_height(), str(int(height)),
-    #                        ha='center', color='white', fontsize=20)
-    #     # remove ticks
-    #     ax.tick_params(axis='x', colors='white', rotation=5 if len(x) > 5 else 0)
-    #     ax.tick_params(top=False, bottom=True, left=False, right=False, labelleft=False, labelbottom=True, labelsize=10)
-    #
-    #     buf = BytesIO()
-    #     fig.savefig(buf, format="png")
-    #     st.image(buf)
-
     def show_elapsed_time_in_segments(self, predictions):
         """count elapsed time in each segment and plot bars"""
 
@@ -119,15 +91,11 @@ class Analyzer:
         # sum up values for same segments
         self.segments_df["elapsed_sec%"] = self.segments_df.groupby('segment key')["elapsed_sec%"].transform('sum')
         df = self.segments_df.drop_duplicates(subset=['segment key', 'elapsed_sec%'])
+        df = df.append({'segment key': "Other", 'elapsed_sec%': 100-df["elapsed_sec%"].sum()}, ignore_index=True)
 
         self.report.time_spent(df)
 
-        # with self.col2:
-        #     self._plot_bars(x=[f"{i}" for i in df["segment key"]],
-        #                     y=df["elapsed_sec%"],
-        #                     title="elapsed time(%)")
-
-            # self.col2.dataframe(self.segments_df[["type", "elapsed_n_frames", "elapsed_sec", "elapsed_sec%"]])
+        # self.col2.dataframe(self.segments_df[["type", "elapsed_n_frames", "elapsed_sec", "elapsed_sec%"]])
 
     def show_n_crossing_in_segments(self, predictions):
         """count number of crossing in each segment and plot bars"""
@@ -140,9 +108,3 @@ class Analyzer:
         df = self.segments_df.drop_duplicates(subset=['segment key', 'n_crossing'])
 
         self.report.n_crossing(df)
-
-        #
-        # with self.col3:
-        #     self._plot_bars(x=[f"{i}" for i in df["segment key"]],
-        #                     y=df["n_crossing"],
-        #                     title="number of crossings")
