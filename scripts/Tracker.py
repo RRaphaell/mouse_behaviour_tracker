@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 from PIL import Image
 import PIL.ImageDraw as ImageDraw
-import streamlit as st
 from scripts.Model import Model
 from scripts.config import KEYPOINT, SEGMENTS, CANVAS
 from scripts.utils import calculate_circle_center_cords
@@ -15,7 +14,6 @@ class Tracker:
     Attributes:
         model (Model): model class for predict mouse keypoint from frame
         segments_df (pd.DataFrame): each row is a segment information such as coordinates, radius etc.
-        img_placeholder (float): streamlit empty space where the frames will be placed
         predictions (list): list of all prediction coordinates
     """
 
@@ -28,12 +26,8 @@ class Tracker:
             segment_colors (dict[str, list[float]]): color for each unique segment
         """
 
-        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
-        predictions_img_placeholder = st.empty()
-
         self.model = Model()
         self.segments_df = segments_df
-        self.img_placeholder = predictions_img_placeholder
         self.segment_colors = segment_colors
         self.predictions = []
 
@@ -72,14 +66,22 @@ class Tracker:
     def draw_predictions(self, frame):
         """draw all segments and predictions on video stream"""
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image_pil = Image.fromarray(np.uint8(frame)).convert('RGB')
+        image_pil = Image.fromarray(frame)
         image_pil = image_pil.resize((CANVAS.width, CANVAS.height))
         draw = ImageDraw.Draw(image_pil, "RGBA")
 
-        self._draw_keypoints(draw)
-        self._draw_segments(draw)
+        predicted_image = self.model.predict(image_pil)
+        ind = np.unravel_index(np.argmax(predicted_image, axis=None), predicted_image.shape)
+        ind = np.array(ind)
+        ind *= 2
 
-        self.img_placeholder.image(image_pil)
+        draw.ellipse([(ind[1] - KEYPOINT.radius, ind[0] - KEYPOINT.radius),
+                      (ind[1] + KEYPOINT.radius, ind[0] + KEYPOINT.radius)],
+                     outline=KEYPOINT.outline, fill=KEYPOINT.fill)
+
+        self._draw_segments(draw)
+        self.predictions.append((ind[0], ind[1]))
+        return image_pil
 
     def get_predictions(self):
         return self.predictions
