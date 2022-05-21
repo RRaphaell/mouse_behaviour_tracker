@@ -1,9 +1,7 @@
 from streamlit_elements import nivo, mui
 from scripts.Report.Dashboard import Dashboard
 from .utils import df_to_dict
-from scripts.config import COLOR_PALETTE
-
-COLOR_PALETTE = [f"rgb{str(c)}" for c in COLOR_PALETTE]
+from scripts.utils import color_to_rgb_str
 
 
 class Pie(Dashboard.Item):
@@ -40,7 +38,7 @@ class Pie(Dashboard.Item):
                     cornerRadius=3,
                     activeOuterRadiusOffset=8,
                     borderWidth=1,
-                    colors=COLOR_PALETTE,
+                    colors=color_to_rgb_str(),
                     colorBy="indexValue",
                     borderColor={
                         "from": "color",
