@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from scripts.Pipeline import Pipeline
-from scripts.config import SEGMENTS, CANVAS
+from scripts.config import CANVAS
 from scripts.utils import show_canvas_info, read_video
 
 
@@ -20,9 +20,9 @@ video, first_image = read_video(file)
 
 # Create center_layout canvas component
 canvas_result = st_canvas(
-    fill_color=SEGMENTS.fill_color,
-    stroke_width=SEGMENTS.stroke_width,
-    stroke_color=SEGMENTS.stroke_color,
+    fill_color=CANVAS.fill_color,
+    stroke_width=CANVAS.stroke_width,
+    stroke_color=CANVAS.stroke_color,
     background_image=first_image,
     update_streamlit=True,
     height=CANVAS.height,
@@ -34,8 +34,8 @@ start_btn = st.button("Start")
 objects = show_canvas_info(canvas_result)
 
 if start_btn:
-    if not video:
+    if not file:
         st.warning("Please upload video first!")    # if user did not upload a video
     else:
-        pipeline = Pipeline(video, objects, first_image)
+        pipeline = Pipeline(video, objects, first_image, file)
         pipeline.run()
