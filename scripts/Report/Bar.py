@@ -1,10 +1,7 @@
 from streamlit_elements import nivo, mui
 from scripts.Report.Dashboard import Dashboard
 from .utils import df_to_dict
-
-COLOR_PALETTE = ["#7042fa", "#b600f9", "#8201b0", "#9064a3", "#1c0525",
-                 "#fff4da", "#f9cf7f", "#aa3c3c", "#398a93", "#012b52",
-                 "#3dc531", "#ea3838", "#ff933b", "#cbca34"]
+from scripts.utils import color_to_hex
 
 
 class Bar(Dashboard.Item):
@@ -37,7 +34,7 @@ class Bar(Dashboard.Item):
                     keys=list(data["segment key"]),
                     indexBy="segment key",
                     margin={"top": 70, "right": 80, "bottom": 40, "left": 80},
-                    colors=COLOR_PALETTE,
+                    colors=color_to_hex(),
                     borderWidth=1,
                     enableGridY=False,
                     fontSize=100,
