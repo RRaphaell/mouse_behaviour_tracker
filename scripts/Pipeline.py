@@ -1,5 +1,6 @@
 import os
 import cv2
+import time
 import tempfile
 import numpy as np
 from scripts.Video import VideoStream
@@ -57,13 +58,20 @@ class Pipeline:
         # frame_height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
         # fps = int(video.get(cv2.CAP_PROP_FPS))
 
+        frame_size = int(self.video.get(cv2.cv2.CAP_PROP_FRAME_COUNT))
+        curr_frame_idx = 0
+        progress_bar = st.progress(0)
+
         file_out = tempfile.NamedTemporaryFile(suffix='.mp4')
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(file_out.name, fourcc, 25.0, (256, 256))
 
         while True:
             success, img = self.video.read()
+            curr_frame_idx += 1
+            progress_bar.progress(curr_frame_idx/frame_size)
             if not success:
+                progress_bar.empty()
                 break
 
             img = self.tracker.draw_predictions(img)
