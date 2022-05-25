@@ -113,9 +113,9 @@ def decoder(inputs, convs, output_channels):
     c6 = decoder_block(inputs, f4, n_filters=128, kernel_size=(3,3), strides=(2,2), dropout=0.3)
     c7 = decoder_block(c6,     f3, n_filters=64,  kernel_size=(3,3), strides=(2,2), dropout=0.3)
     c8 = decoder_block(c7,     f2, n_filters=32,  kernel_size=(3,3), strides=(2,2), dropout=0.3)
-    # c9 = decoder_block(c8,     f1, n_filters=64,  kernel_size=(3,3), strides=(2,2), dropout=0.3)
+    c9 = decoder_block(c8,     f1, n_filters=16,  kernel_size=(3,3), strides=(2,2), dropout=0.3)
 
-    outputs = tf.keras.layers.Conv2D(output_channels, (1, 1), padding="same")(c8)
+    outputs = tf.keras.layers.Conv2D(output_channels, (1, 1), padding="same")(c9)
 
     return outputs
 
