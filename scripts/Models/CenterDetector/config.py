@@ -5,7 +5,7 @@ from pathlib import Path
 class CFG:
     model_name       = 'Unet'
     backbone         = 'resnet18'
-    img_size         = (448, 448)
+    img_size         = (512, 512)
     decoder_channels = (256, 128, 64, 32)
     encoder_depth    = 4
     weights          = None
@@ -20,7 +20,7 @@ class CFG:
 
     device           = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    sigma            = 5  # we use sigma for dot size when generating masks
+    sigma            = 40  # we use sigma for dot size when generating masks
     model_out_dir    = "/scripts/Models/CenterDetector"
     video_dir        = Path("/home/raphael/Desktop/mouse_data")
     annotations_dir  = Path("/home/raphael/Desktop/mouse_data/annotations")
