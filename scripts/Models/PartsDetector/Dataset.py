@@ -26,11 +26,11 @@ class BuildDatasetParts(BuildDataset):
     def get_mask(self, coords_dict, frame):
         point_num = len(self.all_parts)
         output_y_size, output_x_size, _ = frame.shape
-        new_img = np.zeros((output_y_size, output_x_size, point_num))
+        new_img = np.zeros((output_y_size, output_x_size, point_num), dtype=np.uint8)
         for idx, (part, c) in enumerate(coords_dict.items()):
             for i in range(int(c[0]) - 20, int(c[0]) + 20):
                 for j in range(int(c[1]) - 20, int(c[1]) + 20):
-                    cm_c1 = np.exp(-((i - c[0]) ** 2 + (j - c[1]) ** 2) / (2 * self.CFG.sigma ** 2))
+                    cm_c1 = 1.5*np.exp(-((i - c[0]) ** 2 + (j - c[1]) ** 2) / (2 * self.CFG.sigma ** 2))
                     new_img[j, i, idx] = cm_c1
 
         return new_img
