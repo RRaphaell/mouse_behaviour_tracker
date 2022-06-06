@@ -4,23 +4,23 @@ from pathlib import Path
 
 class CFG:
     model_name       = 'Unet'
-    backbone         = 'resnet18'
-    img_size         = (448, 448)
-    decoder_channels = (256, 128, 64, 32)
-    encoder_depth    = 4
-    weights          = None
-    activation       = None
+    backbone         = 'resnet34'
+    img_size         = (512, 512)
+    decoder_channels = (256, 128, 64, 32, 16)
+    encoder_depth    = 5
+    weights          = 'imagenet'
+    activation       = 'softmax'
     in_channels      = 1
-    num_classes      = 1
+    num_classes      = 6
     n_accumulate     = 1
     train_bs         = 16
-    valid_bs         = 16
+    valid_bs         = 32
     n_epoch          = 50
     lr               = 0.001
 
     device           = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    sigma            = 1.5  # we use sigma for dot size when generating masks
+    sigma            = 5  # we use sigma for dot size when generating masks
     model_out_dir    = "/scripts/Models/PartsDetector"
     video_dir        = Path("/home/raphael/Desktop/mouse_data")
     annotations_dir  = Path("/home/raphael/Desktop/mouse_data/annotations")
