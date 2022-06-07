@@ -10,9 +10,8 @@ class CFG:
     encoder_depth    = 5
     weights          = 'imagenet'
     activation       = 'softmax'
-    in_channels      = 1
+    in_channels      = 3
     num_classes      = 6
-    n_accumulate     = 1
     train_bs         = 16
     valid_bs         = 32
     n_epoch          = 50
