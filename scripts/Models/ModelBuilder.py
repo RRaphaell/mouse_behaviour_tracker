@@ -4,16 +4,14 @@ import segmentation_models_pytorch as smp
 
 
 class ModelBuilder:
-    def __init__(self, in_channels, out_channel, config, use_my_model=True, pretrained_model_path=''):
-        self.in_channels = in_channels
-        self.out_channel = out_channel
+    def __init__(self, config, use_my_model=True, pretrained_model_path=''):
         self.CFG = config
         self.use_my_model = use_my_model
         self.pretrained_model_path = pretrained_model_path
 
     def build_model(self):
         if self.use_my_model:
-            model = UNet(self.in_channels, self.out_channel)
+            model = UNet(self.CFG.in_channels, self.CFG.num_classes)
         else:
             model = getattr(smp, self.CFG.model_name)(
                 encoder_name=self.CFG.backbone,    # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
