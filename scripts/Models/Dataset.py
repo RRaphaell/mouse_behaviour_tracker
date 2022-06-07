@@ -50,13 +50,6 @@ class BuildDataset(torch.utils.data.Dataset):
             annotations_dict[v] = movie_annot
         return videos, images_path, annotations_dict
 
-    @staticmethod
-    def get_video_and_frame_name(s):
-        underscore_idx = s.rfind('_')
-        video_name = s[:underscore_idx]
-        frame_name = s[(underscore_idx + 1):]
-        return video_name, frame_name
-
     def _get_cords(self, video_name, frame_name):
         return self.annotations_dict[video_name]["nose"][frame_name]
 
@@ -65,10 +58,11 @@ class BuildDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         video_name, frame_name = self.images_path[index]
-        # video_name, frame_name = BuildDataset.get_video_and_frame_name(img_name)
-        img = cv2.imread(f"images/{video_name}/{frame_name}.jpg")
+        img = cv2.imread(f"images/{video_name}/{frame_name}.jpg", )
         # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
         mask = np.load(f"masks/{video_name}/{frame_name}.npy")
+
         if self.transforms:
             data = self.transforms(image=img, mask=mask)
             img = data['image']
@@ -78,5 +72,5 @@ class BuildDataset(torch.utils.data.Dataset):
         img = img.permute(-1, 0, 1)
         msk = msk.permute(-1, 0, 1)
 
-        img = np.expand_dims(img[0], axis=0)
+        # img = np.expand_dims(img, axis=0)
         return img, msk
