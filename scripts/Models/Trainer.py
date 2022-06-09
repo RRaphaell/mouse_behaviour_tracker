@@ -7,10 +7,13 @@ import torch
 
 
 class Trainer:
-    def __init__(self, model, train_dataloader, valid_dataloader, optimizer, loss_fn, dice_loss, iou_loss, config):
+    def __init__(self, model, train_dataloader, valid_dataloader,
+                 *, scheduler, optimizer, loss_fn, dice_loss, iou_loss, config):
+
         self.model = model
         self.train_loader = train_dataloader
         self.valid_loader = valid_dataloader
+        self.scheduler = scheduler
         self.optimizer = optimizer
         self.loss_fn = loss_fn
         self.dice_loss = dice_loss
@@ -65,6 +68,9 @@ class Trainer:
             loss.backward()
             self.optimizer.step()
             self.optimizer.zero_grad()
+
+            if self.scheduler is not None:
+                self.scheduler.step()
 
             running_loss += (loss.item() * batch_size)
             dataset_size += batch_size
