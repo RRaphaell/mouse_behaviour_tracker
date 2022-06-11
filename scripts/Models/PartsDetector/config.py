@@ -16,7 +16,7 @@ class CFG:
     num_classes = 6
 
     train_bs = 16
-    valid_bs = 64
+    valid_bs = train_bs * 3
     n_epoch = 150
 
     lr = 0.001
