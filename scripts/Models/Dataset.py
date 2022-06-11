@@ -70,12 +70,12 @@ class BuildDataset(torch.utils.data.Dataset):
 
         img = img.permute(-1, 0, 1)
         msk = msk.permute(-1, 0, 1)
-
-        # img = np.expand_dims(img, axis=0)
+        if self.CFG.in_channels == 1:
+            img = np.expand_dims(img[0], axis=0)
         return img, msk
 
     @staticmethod
-    def show_batch_examples(dataset, num_examples):
+    def show_batch_examples(dataset, num_examples, is_parts_detector=False):
         figure = plt.figure(figsize=(10, num_examples * 3))
         cols, rows = 2, num_examples
 
@@ -88,7 +88,7 @@ class BuildDataset(torch.utils.data.Dataset):
             ax1.set_title("image")
 
             ax2 = figure.add_subplot(rows, cols, i+1)
-            ax2.imshow(torch.argmax(label, dim=0))
+            ax2.imshow(torch.mean(label.float(), dim=0))
             ax2.set_title("ground truth")
 
         plt.tight_layout()
