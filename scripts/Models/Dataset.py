@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from pathlib import Path
+import matplotlib.pyplot as plt
 import xml.etree.ElementTree as ET
 import torch
 
@@ -59,8 +60,6 @@ class BuildDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         video_name, frame_name = self.images_path[index]
         img = cv2.imread(f"images/{video_name}/{frame_name}.jpg", )
-        # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
         mask = np.load(f"masks/{video_name}/{frame_name}.npy")
 
         if self.transforms:
@@ -74,3 +73,22 @@ class BuildDataset(torch.utils.data.Dataset):
 
         # img = np.expand_dims(img, axis=0)
         return img, msk
+
+    @staticmethod
+    def show_batch_examples(dataset, num_examples):
+        figure = plt.figure(figsize=(10, num_examples * 3))
+        cols, rows = 2, num_examples
+
+        for i in range(1, cols * rows + 1, 2):
+            sample_idx = torch.randint(len(dataset), size=(1,)).item()
+            img, label = dataset[sample_idx]
+
+            ax1 = figure.add_subplot(rows, cols, i)
+            ax1.imshow(img[0])
+            ax1.set_title("image")
+
+            ax2 = figure.add_subplot(rows, cols, i+1)
+            ax2.imshow(torch.argmax(label, dim=0))
+            ax2.set_title("ground truth")
+
+        plt.tight_layout()
