@@ -31,7 +31,7 @@ class ModelBuilder:
 
     def load_model(self):
         model = self.build_model()
-        model.load_state_dict(torch.load(self.pretrained_model_path))
+        model.load_state_dict(torch.load(self.pretrained_model_path, map_location=self.CFG.device))
         model.eval()
         return model
 
