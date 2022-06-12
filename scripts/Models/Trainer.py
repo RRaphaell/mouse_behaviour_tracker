@@ -110,7 +110,7 @@ class Trainer:
             self.logs["valid_loss"].append(val_loss)
             self.logs["valid_iou"].append(val_iou)
             self.logs["valid_dice"].append(val_dice)
-            self.logs["lr"].append(self.scheduler.get_last_lr()[0])
+            self.logs["lr"].append(self.optimizer.param_groups[0]['lr'])
 
             if (val_dice >= best_dice) and (val_iou >= best_iou):
                 print(
@@ -181,11 +181,11 @@ class Trainer:
             ax1.set_title("image")
 
             ax2 = figure.add_subplot(rows, cols, i + 1)
-            ax2.imshow(torch.argmax(label, dim=0))
+            ax2.imshow(torch.mean(label.float(), dim=0))
             ax2.set_title("ground truth")
 
             ax3 = figure.add_subplot(rows, cols, i + 2)
-            ax3.imshow(torch.argmax(pred[0], dim=0))
+            ax3.imshow(torch.mean(pred[0], dim=0))
             ax3.set_title("predicted")
 
         plt.tight_layout()
