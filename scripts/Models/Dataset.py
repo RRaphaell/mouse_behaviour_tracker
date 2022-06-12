@@ -71,7 +71,7 @@ class BuildDataset(torch.utils.data.Dataset):
         img = img.permute(-1, 0, 1)
         msk = msk.permute(-1, 0, 1)
         if self.CFG.in_channels == 1:
-            img = np.expand_dims(img[0], axis=0)
+            img = torch.unsqueeze(img[0], 0)
         return img, msk
 
     @staticmethod
