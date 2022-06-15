@@ -2,12 +2,14 @@ import os
 import cv2
 import time
 import tempfile
+
 import numpy as np
 from scripts.Video import VideoStream
 from scripts.Tracker import Tracker
 from scripts.Analyzer import Analyzer
 from scripts.utils import generate_segments_colors
 from scripts.Report import Bar, Card, Dashboard, Pie
+from scripts.config import CANVAS
 import streamlit as st
 from types import SimpleNamespace
 
@@ -64,7 +66,7 @@ class Pipeline:
 
         file_out = tempfile.NamedTemporaryFile(suffix='.mp4')
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(file_out.name, fourcc, 25.0, (256, 256))
+        out = cv2.VideoWriter(file_out.name, fourcc, 25.0, (CANVAS.height, CANVAS.width))
 
         while True:
             success, img = self.video.read()
@@ -87,14 +89,14 @@ class Pipeline:
         st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
         st.video(video_file)
 
-        predictions = np.array(self.tracker.get_predictions())
-
-        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
-        with elements("demo"):
-            with self.report.dashboard(rowHeight=57):
-                self.analyzer.draw_tracked_road(predictions)
-                self.analyzer.show_elapsed_time_in_segments(predictions)
-                self.analyzer.show_n_crossing_in_segments(predictions)
+        # predictions = np.array(self.tracker.get_predictions())
+        #
+        # st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
+        # with elements("demo"):
+        #     with self.report.dashboard(rowHeight=57):
+        #         self.analyzer.draw_tracked_road(predictions)
+        #         self.analyzer.show_elapsed_time_in_segments(predictions)
+        #         self.analyzer.show_n_crossing_in_segments(predictions)
 
         self.video.release()
         cv2.destroyAllWindows()
