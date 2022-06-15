@@ -15,7 +15,7 @@
 
 [data-testId="stVerticalBlock"] div:nth-of-type(3) iframe {
     margin-left: 50%;
-    transform: translateX(-128px);
+    transform: translateX(-256px);
 }
 
 [data-testId="stVerticalBlock"] div:nth-of-type(9) {
