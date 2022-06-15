@@ -80,12 +80,17 @@ class Controller:
         coords = Controller._get_xy_of_preds(center_pred)
         coords = Controller._rescale_coord_for_orig_img(orig_img, coords)
         center_cropped_image, crop_from_y, crop_from_x = Controller.get_cropped_image(orig_img, coords[0])
+        cropped_img_size = center_cropped_image.shape
 
         # parts detector
         center_cropped_image = self.prepare_img_for_parts_detector(center_cropped_image)
         parts_pred = self._predict_img(center_cropped_image, is_part_detector=True)
         coords = Controller._get_xy_of_preds(parts_pred)
         for c in coords:
-            orig_img = cv2.circle(orig_img, (int(c[1]+crop_from_x), int(c[0]+crop_from_y)), 10, (0,0,255), -1)
+            if c != [0, 0]: # if model doesn't predict any part it returns [0,0]
+                orig_img = cv2.circle(orig_img,
+                                      (int(c[1]+crop_from_x-(CCFG.img_size[1]-cropped_img_size[1])),
+                                       int(c[0]+crop_from_y-(CCFG.img_size[0]-cropped_img_size[0]))),
+                                      5, (0, 0, 255), -1)
 
         return orig_img
