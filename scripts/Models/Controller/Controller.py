@@ -13,6 +13,8 @@ class Controller:
         self.parts_transforms = parts_transforms
         self.center_detector_model, self.parts_detector_model = self.build_models()
 
+        self.predictions = []
+
     def build_models(self):
         model_builder = ModelBuilder(CCFG, use_my_model=True, pretrained_model_path=self.center_model_path)
         center_detector_model = model_builder.get_model()
@@ -60,9 +62,10 @@ class Controller:
         coords = [(int(coord[1]*x_scale), int(coord[0]*y_scale)) for coord in coords]
         return coords
 
-    @staticmethod
-    def _get_xy_of_preds(pred):
+    def _get_xy_of_preds(self, pred):
         pred = torch.squeeze(pred, 0)
+        pred_ = (pred[0]==torch.max(pred[0])).nonzero()[0]
+        self.predictions.append((pred_[1].item(), pred_[0].item()))
         coords = [(pred[i]==torch.max(pred[i])).nonzero()[0] for i in range(pred.shape[0])]
         return coords
 
@@ -77,7 +80,7 @@ class Controller:
         # center detector
         img = self.prepare_img_for_center_detector(orig_img)
         center_pred = self._predict_img(img, is_part_detector=False)
-        coords = Controller._get_xy_of_preds(center_pred)
+        coords = self._get_xy_of_preds(center_pred)
         coords = Controller._rescale_coord_for_orig_img(orig_img, coords)
         center_cropped_image, crop_from_y, crop_from_x = Controller.get_cropped_image(orig_img, coords[0])
         cropped_img_size = center_cropped_image.shape
@@ -85,7 +88,8 @@ class Controller:
         # parts detector
         center_cropped_image = self.prepare_img_for_parts_detector(center_cropped_image)
         parts_pred = self._predict_img(center_cropped_image, is_part_detector=True)
-        coords = Controller._get_xy_of_preds(parts_pred)
+        coords = self._get_xy_of_preds(parts_pred)
+        # should move out
         for c in coords:
             if c != [0, 0]: # if model doesn't predict any part it returns [0,0]
                 orig_img = cv2.circle(orig_img,
@@ -94,3 +98,6 @@ class Controller:
                                       5, (0, 0, 255), -1)
 
         return orig_img
+
+    def get_predictions(self):
+        return self.predictions
