@@ -57,6 +57,7 @@ class Analyzer:
 
     def _count_elapsed_n_frames(self, segment, predictions):
         """count quantity of frames when mouse is in segment"""
+        predictions = np.stack(predictions)
         x, y = predictions[:, 0], predictions[:, 1]
 
         if segment["type"] == "rect":
