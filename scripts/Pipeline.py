@@ -56,10 +56,6 @@ class Pipeline:
     def run(self):
         """this function runs video stream, use tracker to show segments, predictions and also analyzes them"""
 
-        # frame_width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-        # frame_height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        # fps = int(video.get(cv2.CAP_PROP_FPS))
-
         frame_size = int(self.video.get(cv2.cv2.CAP_PROP_FRAME_COUNT))
         curr_frame_idx = 0
         progress_bar = st.progress(0)
@@ -89,14 +85,14 @@ class Pipeline:
         st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
         st.video(video_file)
 
-        # predictions = np.array(self.tracker.get_predictions())
-        #
-        # st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
-        # with elements("demo"):
-        #     with self.report.dashboard(rowHeight=57):
-        #         self.analyzer.draw_tracked_road(predictions)
-        #         self.analyzer.show_elapsed_time_in_segments(predictions)
-        #         self.analyzer.show_n_crossing_in_segments(predictions)
+        predictions = np.array(self.tracker.get_predictions())
+
+        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
+        with elements("demo"):
+            with self.report.dashboard(rowHeight=57):
+                self.analyzer.draw_tracked_road(predictions)
+                self.analyzer.show_elapsed_time_in_segments(predictions)
+                self.analyzer.show_n_crossing_in_segments(predictions)
 
         self.video.release()
         cv2.destroyAllWindows()
