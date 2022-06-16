@@ -76,7 +76,7 @@ class Controller:
 
         return pred.cpu().detach()
 
-    def get_predicted_image(self, orig_img):
+    def predict_img(self, orig_img):
         # center detector
         img = self.prepare_img_for_center_detector(orig_img)
         center_pred = self._predict_img(img, is_part_detector=False)
@@ -89,15 +89,8 @@ class Controller:
         center_cropped_image = self.prepare_img_for_parts_detector(center_cropped_image)
         parts_pred = self._predict_img(center_cropped_image, is_part_detector=True)
         coords = self._get_xy_of_preds(parts_pred)
-        # should move out
-        for c in coords:
-            if c != [0, 0]: # if model doesn't predict any part it returns [0,0]
-                orig_img = cv2.circle(orig_img,
-                                      (int(c[1]+crop_from_x-(CCFG.img_size[1]-cropped_img_size[1])),
-                                       int(c[0]+crop_from_y-(CCFG.img_size[0]-cropped_img_size[0]))),
-                                      5, (0, 0, 255), -1)
 
-        return orig_img
+        return coords, cropped_img_size, crop_from_x, crop_from_y
 
     def get_predictions(self):
         return self.predictions
