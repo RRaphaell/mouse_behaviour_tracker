@@ -64,8 +64,6 @@ class Controller:
 
     def _get_xy_of_preds(self, pred):
         pred = torch.squeeze(pred, 0)
-        pred_ = (pred[0]==torch.max(pred[0])).nonzero()[0]
-        self.predictions.append((pred_[1].item(), pred_[0].item()))
         coords = [(pred[i]==torch.max(pred[i])).nonzero()[0] for i in range(pred.shape[0])]
         return coords
 
@@ -90,7 +88,13 @@ class Controller:
         parts_pred = self._predict_img(center_cropped_image, is_part_detector=True)
         coords = self._get_xy_of_preds(parts_pred)
 
-        return coords, cropped_img_size, crop_from_x, crop_from_y
+        # rescale coords to orig image
+        coords = [(int(c[1] + crop_from_x - (CCFG.img_size[1] - cropped_img_size[1])),
+                   int(c[0] + crop_from_y - (CCFG.img_size[0] - cropped_img_size[0]))) for c in coords]
+
+        self.predictions.append(coords[0])
+
+        return coords
 
     def get_predictions(self):
         return self.predictions
