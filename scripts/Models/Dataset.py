@@ -41,14 +41,14 @@ class BuildDataset(torch.utils.data.Dataset):
             tree = ET.parse(annot_path)
             root = tree.getroot()
 
-            movie_annot = dict()
+            points = {part: {} for part in self.CFG.parts}
             for r in root[2:]:
-                points = {}
                 for child in r.getchildren():
-                    points[child.get("frame") + ".jpg"] = list(map(int, map(float, child.get("points").split(","))))
-                movie_annot[r.get("label")] = points
+                    label = child.get("label")
+                    frame_idx = r.get("id") + ".jpg"
+                    points[label][frame_idx] = list(map(int, map(float, child.get("points").split(","))))
 
-            annotations_dict[v] = movie_annot
+            annotations_dict[v] = points
         return videos, images_path, annotations_dict
 
     def _get_cords(self, video_name, frame_name):
