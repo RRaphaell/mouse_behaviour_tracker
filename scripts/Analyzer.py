@@ -5,6 +5,7 @@ import PIL.ImageDraw as ImageDraw
 import matplotlib.pyplot as plt
 from scripts.config import KEYPOINT, CANVAS
 from scripts.utils import calculate_circle_center_cords
+from scripts.Models.CenterDetector.config import CFG as CCFG
 
 plt.rcParams.update({
     "axes.facecolor":    (0.054, 0.066, 0.090, 1.0),  # same as streamlit dark style color
@@ -39,19 +40,19 @@ class Analyzer:
         self.segments_df = segments_df
         self.first_image = first_image
         self.num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.frame_width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.frame_heigt = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.frames_per_second = video.get(cv2.CAP_PROP_FPS)
         self.segment_colors = segment_colors
         self.report = report
 
     def draw_tracked_road(self, predictions):
         """Draw the entire route covered by the mouse"""
-        self.first_image = self.first_image.resize((CANVAS.width, CANVAS.height))
-        draw = ImageDraw.Draw(self.first_image, "RGBA")
+        for x, y in predictions:
+            if (y, x) != [0, 0]:  # if model doesn't predict any part it returns [0,0]
+                self.first_image = cv2.circle(np.array(self.first_image), (x, y), 7, (255, 0, 0), -1)
 
-        for keypoint_x, keypoint_y in predictions:
-            draw.ellipse([(keypoint_x - KEYPOINT.radius, keypoint_y - KEYPOINT.radius),
-                          (keypoint_x + KEYPOINT.radius, keypoint_y + KEYPOINT.radius)],
-                         outline=KEYPOINT.outline[::-1], fill=KEYPOINT.fill[::-1])
+        self.first_image = cv2.resize(self.first_image, (CANVAS.height, CANVAS.width), interpolation=cv2.INTER_NEAREST)
 
         self.report.road_passed(self.first_image)
 
@@ -59,7 +60,9 @@ class Analyzer:
         """count quantity of frames when mouse is in segment"""
         predictions = np.stack(predictions)
         x, y = predictions[:, 0], predictions[:, 1]
-
+        x = x * CANVAS.width / self.frame_width
+        y = y * CANVAS.height / self.frame_heigt
+        
         if segment["type"] == "rect":
             x1, y1 = segment["left"], segment["top"]
             x2, y2 = segment["left"]+segment["width"], segment["top"]+segment["height"]
