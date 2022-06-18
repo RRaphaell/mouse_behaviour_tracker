@@ -30,8 +30,11 @@ class CFG:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     sigma = 40  # we use sigma for dot size when generating masks
+    parts = ["nose", "backbone", "left_eye", "right_eye", "tail_start", "tail_end"]
     model_out_dir = "./"
-    video_dir = Path("/kaggle/input/mouse-video")
-    annotations_dir = Path("/kaggle/input/mouse-annotations")
-    videos_name = ["WIN_20201123_1-1"]
+    video_dir = Path("/home/raphael/Desktop/mouse_data")
+    annotations_dir = Path("/home/raphael/Desktop/mouse_data/annotations/cvat_images")
+    videos_name = ["WIN_20201123_4-2",
+                   "WIN_20201123_2-3_trimmed_0-10s",
+                   "WIN_20201123_1-3"]
 
