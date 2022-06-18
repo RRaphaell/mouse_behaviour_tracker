@@ -47,14 +47,11 @@ class Tracker:
         self.segments_df = segments_df
         self.segment_colors = segment_colors
 
-    def _draw_keypoints(self, frame, coords, cropped_img_size, crop_from_x, crop_from_y):
+    def _draw_keypoints(self, frame, coords):
         """draw model prediction keypoint"""
         for c in coords:
             if c != [0, 0]:  # if model doesn't predict any part it returns [0,0]
-                frame = cv2.circle(frame,
-                                   (int(c[1] + crop_from_x - (CCFG.img_size[1] - cropped_img_size[1])),
-                                    int(c[0] + crop_from_y - (CCFG.img_size[0] - cropped_img_size[0]))),
-                                   5, (0, 0, 255), -1)
+                frame = cv2.circle(frame, c, 5, (0, 0, 255), -1)
 
     def _draw_segments(self, img):
         """Draw all segments on the video stream that were drawn on the canvas"""
@@ -71,20 +68,20 @@ class Tracker:
                               (int(segment["left"] + segment["width"]), int(segment["top"] + segment["height"])),
                               color=color[:-1], thickness=-1)
 
-                img = cv2.addWeighted(overlay, 0.6, img, 0.4, 1.0)
+                img = cv2.addWeighted(overlay, 0.5, img, 0.5, 1.0)
             else:
                 center_x, center_y = calculate_circle_center_cords(segment)
                 cv2.circle(overlay,
                            (int(center_x), int(center_y)),
                            int(segment["radius"]), color=color[:-1], thickness=-1)
-                img = cv2.addWeighted(overlay, 0.6, img, 0.4, 1.0)
+                img = cv2.addWeighted(overlay, 0.5, img, 0.5, 1.0)
 
         return img
 
     def draw_predictions(self, frame):
         """draw all segments and predictions on video stream"""
-        coords, cropped_img_size, crop_from_x, crop_from_y = self.controller.predict_img(np.array(frame))
-        self._draw_keypoints(frame, coords, cropped_img_size, crop_from_x, crop_from_y)
+        coords = self.controller.predict_img(np.array(frame))
+        self._draw_keypoints(frame, coords)
         predicted_image = cv2.resize(frame, (CANVAS.height, CANVAS.width), interpolation=cv2.INTER_NEAREST)
         predicted_image = self._draw_segments(predicted_image)
         return predicted_image
