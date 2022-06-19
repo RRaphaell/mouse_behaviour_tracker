@@ -2,13 +2,14 @@ import cv2
 import numpy as np
 from pathlib import Path
 from scripts.Models.Dataset import BuildDataset
+from config import CFG
 
 
 class BuildDatasetParts(BuildDataset):
     def __init__(self, *args, **kwargs):
         super(BuildDatasetParts, self).__init__(*args, **kwargs)
 
-        self.all_parts = ["nose", "backbone", "left_eye", "right_eye", "tail_start", "tail_end"]
+        self.all_parts = CFG.parts
         self.generate_image_and_masks()
 
     def _crop_image(self, image, backbone_coordinates):
@@ -27,7 +28,10 @@ class BuildDatasetParts(BuildDataset):
         point_num = len(self.all_parts)
         output_y_size, output_x_size, _ = frame.shape
         new_img = np.zeros((output_y_size, output_x_size, point_num), dtype=np.uint8)
-        for idx, (part, c) in enumerate(coords_dict.items()):
+        for idx, part in enumerate(self.all_parts):
+            c = coords_dict.get(part, None)
+            if c is None:
+                continue
             for i in range(int(c[0]) - 20, int(c[0]) + 20):
                 for j in range(int(c[1]) - 20, int(c[1]) + 20):
                     cm_c1 = 1.5*np.exp(-((i - c[0]) ** 2 + (j - c[1]) ** 2) / (2 * self.CFG.sigma ** 2))
