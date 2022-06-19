@@ -1,10 +1,7 @@
 import os
 import cv2
-import time
 import tempfile
-
 import numpy as np
-from scripts.Video import VideoStream
 from scripts.Tracker import Tracker
 from scripts.Analyzer import Analyzer
 from scripts.utils import generate_segments_colors
@@ -12,7 +9,6 @@ from scripts.Report import Bar, Card, Dashboard, Pie
 from scripts.config import CANVAS
 import streamlit as st
 from types import SimpleNamespace
-
 from streamlit_elements import elements
 
 
@@ -22,7 +18,9 @@ class Pipeline:
     It runs the video, makes predictions for each frame, and analyzes the results.
 
     Attributes:
-        video_stream (VideoStream): runs a video stream from a video object in thread
+        file (st.file_uploader): uploaded file with streamlit widget
+        video (cv2.VideoCapture): Video file to process.
+        report: (SimpleNamespace): namespace which contains several streamlit_elements to show some behaviour analysis
         tracker (Tracker): adds segment and predictions to video stream
         analyzer (Analyzer): analyze predictions and show some results
         first_image (np.array): first image from video. Used as background for canvas and results placed on that also
@@ -36,6 +34,7 @@ class Pipeline:
             video (cv2.VideoCapture): Video file to process.
             segments_df (pd.DataFrame): dataframe of segments information
             first_image (np.ndarray): first image of the video
+            file (st.file_uploader): uploaded file with streamlit widget
         """
 
         segment_colors = generate_segments_colors(segments_df)
@@ -48,7 +47,6 @@ class Pipeline:
             road_passed=Card(3, 8, 6, 12, minW=2, minH=4)
         )
 
-        # self.video_stream = VideoStream(video)
         self.tracker = Tracker(segments_df, segment_colors)
         self.analyzer = Analyzer(video, segments_df, first_image, segment_colors, self.report)
         self.first_image = first_image
@@ -56,7 +54,7 @@ class Pipeline:
     def run(self):
         """this function runs video stream, use tracker to show segments, predictions and also analyzes them"""
 
-        frame_size = int(self.video.get(cv2.cv2.CAP_PROP_FRAME_COUNT))
+        frame_size = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
         curr_frame_idx = 0
         progress_bar = st.progress(0)
 

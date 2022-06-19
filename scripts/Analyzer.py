@@ -1,11 +1,8 @@
 import cv2
 import numpy as np
-import streamlit as st
-import PIL.ImageDraw as ImageDraw
 import matplotlib.pyplot as plt
-from scripts.config import KEYPOINT, CANVAS
+from scripts.config import CANVAS
 from scripts.utils import calculate_circle_center_cords
-from scripts.Models.CenterDetector.config import CFG as CCFG
 
 plt.rcParams.update({
     "axes.facecolor":    (0.054, 0.066, 0.090, 1.0),  # same as streamlit dark style color
@@ -18,10 +15,14 @@ class Analyzer:
     This class used to make analysis based on predictions and segments information.
 
     Attributes:
-        segments_df: (pd.Dataframe): dataframe of segments information
+        segments_df (pd.Dataframe): dataframe of segments information
         first_image (np.ndarray): first image of the video. Used as background for canvas and results placed on that also
         num_frames (int): number of frames in the video
+        frame_width (int): video frames width
+        frame_heigt (int): video frames height
         frames_per_second (float): number of frames per second
+        segment_colors (dict[str, list[float]]): color for each unique segment
+        report: (SimpleNamespace): namespace which contains several streamlit_elements to show some behaviour analysis
     """
 
     def __init__(self, video, segments_df, first_image, segment_colors, report):
@@ -33,9 +34,8 @@ class Analyzer:
             segments_df (pd.Dataframe): dataframe of segments information
             first_image (np.ndarray): first image of the video. Used as background for canvas and results placed on that also
             segment_colors (dict[str, list[float]]): color for each unique segment
+            report: (SimpleNamespace): namespace which contains several streamlit_elements to show some behaviour analysis
         """
-
-        self.col1, self.col2, self.col3 = st.columns(3)
 
         self.segments_df = segments_df
         self.first_image = first_image
@@ -98,8 +98,6 @@ class Analyzer:
         df = df.append({'segment key': "Other", 'elapsed_sec%': 100-df["elapsed_sec%"].sum()}, ignore_index=True)
 
         self.report.time_spent(df)
-
-        # self.col2.dataframe(self.segments_df[["type", "elapsed_n_frames", "elapsed_sec", "elapsed_sec%"]])
 
     def show_n_crossing_in_segments(self, predictions):
         """count number of crossing in each segment and plot bars"""

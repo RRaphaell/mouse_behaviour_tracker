@@ -13,17 +13,15 @@ COLOR_PALETTE = [
 class SEGMENTS:
     stroke_width = 1
     stroke_color = (0, 0, 255)
+    alpha = 0.5
 
 
 class KEYPOINT:
-    radius = 2
+    radius = 5
     fill = (0, 0, 255)
-    outline = (0, 0, 255)
 
 
 class CANVAS:
-    # width = 704
-    # height = 396
     width = 512
     height = 512
     fill_color = "rgba(255, 165, 0, 0.3)",

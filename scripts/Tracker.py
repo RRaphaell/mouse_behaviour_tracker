@@ -3,10 +3,7 @@ import numpy as np
 from scripts.Models.Controller.Controller import Controller
 from scripts.config import KEYPOINT, SEGMENTS, CANVAS
 from scripts.utils import calculate_circle_center_cords
-
-import albumentations as A
-from scripts.Models.CenterDetector.config import CFG as CCFG
-from scripts.Models.PartsDetector.config import CFG as PCFG
+from typing import Type
 
 
 class Tracker:
@@ -14,8 +11,9 @@ class Tracker:
     This class used to draw segments on video stream, including everything drawn on canvas and all predictions
 
     Attributes:
-        model (Model): model class for predict mouse keypoint from frame
+        controller (Type[Controller]): model controller class to use both model in proper way
         segments_df (pd.DataFrame): each row is a segment information such as coordinates, radius etc.
+        segment_colors (dict[str, list[float]]): color for each unique segment
     """
 
     def __init__(self, segments_df, segment_colors):
@@ -27,23 +25,7 @@ class Tracker:
             segment_colors (dict[str, list[float]]): color for each unique segment
         """
 
-        center_transforms = A.Compose([
-            A.Resize(*CCFG.img_size, interpolation=cv2.INTER_NEAREST),
-            A.Normalize()
-        ], p=1.0)
-
-        parts_transforms = A.Compose([
-            A.Normalize(),
-            A.PadIfNeeded(PCFG.img_size[0], PCFG.img_size[1],
-                          position=A.transforms.PadIfNeeded.PositionType.BOTTOM_RIGHT,
-                          border_mode=cv2.BORDER_CONSTANT,
-                          value=0, mask_value=0),
-        ], p=1.0)
-
-        self.controller = Controller("scripts/Models/CenterDetector/weights.bin",
-                                     "scripts/Models/PartsDetector/weights.bin",
-                                     center_transforms,
-                                     parts_transforms)
+        self.controller = Controller()
         self.segments_df = segments_df
         self.segment_colors = segment_colors
 
@@ -51,7 +33,7 @@ class Tracker:
         """draw model prediction keypoint"""
         for c in coords:
             if c != [0, 0]:  # if model doesn't predict any part it returns [0,0]
-                frame = cv2.circle(frame, c, 5, (0, 0, 255), -1)
+                frame = cv2.circle(frame, c, KEYPOINT.radius, KEYPOINT.fill, -1)
 
     def _draw_segments(self, img):
         """Draw all segments on the video stream that were drawn on the canvas"""
@@ -68,13 +50,13 @@ class Tracker:
                               (int(segment["left"] + segment["width"]), int(segment["top"] + segment["height"])),
                               color=color[:-1], thickness=-1)
 
-                img = cv2.addWeighted(overlay, 0.5, img, 0.5, 1.0)
+                img = cv2.addWeighted(overlay, SEGMENTS.alpha, img, 1-SEGMENTS.alpha, 1.0)
             else:
                 center_x, center_y = calculate_circle_center_cords(segment)
                 cv2.circle(overlay,
                            (int(center_x), int(center_y)),
                            int(segment["radius"]), color=color[:-1], thickness=-1)
-                img = cv2.addWeighted(overlay, 0.5, img, 0.5, 1.0)
+                img = cv2.addWeighted(overlay, SEGMENTS.alpha, img, 1-SEGMENTS.alpha, 1.0)
 
         return img
 
