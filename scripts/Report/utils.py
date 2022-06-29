@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 def df_to_dict(df, col):
     data = []
     for index, row in df.iterrows():
