@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 import pandas as pd
@@ -107,4 +108,14 @@ def generate_segments_colors(segments_df):
     return segment_colors
 
 
+def create_video_output_file(frame_rate, height, width):
+    file_out = tempfile.NamedTemporaryFile(suffix='.mp4')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(file_out.name, fourcc, frame_rate, (height, width))
+    return file_out, out
 
+
+def convert_mp4_standard_format(file_out):
+    os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f mp4 {file_out.name}_new")
+    video_file = open(f"{file_out.name}_new", "rb")
+    return video_file
