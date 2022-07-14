@@ -4,7 +4,8 @@ from pathlib import Path
 
 class CFG:
     model_name = 'Unet'
-    img_size = (512, 512)
+    img_size = (128, 128)
+    cropping_size = (416, 416)
 
     backbone = 'resnet18'
     weights = 'imagenet'

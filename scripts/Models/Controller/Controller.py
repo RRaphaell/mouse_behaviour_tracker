@@ -1,12 +1,12 @@
 import cv2
 import torch
-
 from scripts.Models.ModelBuilder import ModelBuilder
 from scripts.Models.CenterDetector.config import CFG as CENTER_CFG
 from scripts.Models.PartsDetector.config import CFG as PARTS_CFG
 from scripts.Models.Controller.config import CFG as CONTROLLER_CFG
 from scripts.Models.Controller.utils import get_xy_of_preds, rescale_coord_for_orig_img, get_cropped_image
 import albumentations as A
+from albumentations.pytorch.transforms import ToTensorV2
 
 
 class Controller:
@@ -29,15 +29,18 @@ class Controller:
 
         self.center_transforms = A.Compose([
             A.Resize(*CENTER_CFG.img_size, interpolation=cv2.INTER_NEAREST),
-            A.Normalize()
+            A.Normalize(),
+            ToTensorV2()
         ], p=1.0)
 
         self.parts_transforms = A.Compose([
             A.Normalize(),
-            A.PadIfNeeded(PARTS_CFG.img_size[0], PARTS_CFG.img_size[1],
+            A.PadIfNeeded(CENTER_CFG.cropping_size[0], CENTER_CFG.cropping_size[1],
                           position=A.transforms.PadIfNeeded.PositionType.BOTTOM_RIGHT,
                           border_mode=cv2.BORDER_CONSTANT,
                           value=0, mask_value=0),
+            A.Resize(*PARTS_CFG.img_size, interpolation=cv2.INTER_NEAREST),
+            ToTensorV2()
         ], p=1.0)
 
         self.center_detector_model, self.parts_detector_model = self.build_models()
@@ -57,8 +60,6 @@ class Controller:
     def prepare_img_for_center_detector(self, img):
         """image processing before predict center of image"""
         img = self.center_transforms(image=img)["image"]
-        img = torch.tensor(img)
-        img = img.permute(-1, 0, 1)
         img = torch.unsqueeze(img[0], 0)
         img = img.to(CENTER_CFG.device, dtype=torch.float)
         img = torch.unsqueeze(img, 0)
@@ -67,8 +68,6 @@ class Controller:
     def prepare_img_for_parts_detector(self, img):
         """image processing before predict body parts of image"""
         img = self.parts_transforms(image=img)["image"]
-        img = torch.tensor(img)
-        img = img.permute(-1, 0, 1)
         img = torch.unsqueeze(img, 0)
         img = img.to(CENTER_CFG.device, dtype=torch.float)
         return img
@@ -88,7 +87,7 @@ class Controller:
         center_pred = self._predict_img(img, is_part_detector=False)
         coords = get_xy_of_preds(center_pred)
         coords = rescale_coord_for_orig_img(orig_img, coords, CENTER_CFG.img_size)
-        center_cropped_image, crop_from_y, crop_from_x = get_cropped_image(orig_img, coords[0], CENTER_CFG.img_size)
+        center_cropped_image, crop_from_y, crop_from_x = get_cropped_image(orig_img, coords, CENTER_CFG.cropping_size)
         cropped_img_size = center_cropped_image.shape
 
         # parts detector
@@ -97,8 +96,8 @@ class Controller:
         coords = get_xy_of_preds(parts_pred)
 
         # rescale coords to orig image
-        coords = [(int(c[1] + crop_from_x - (CENTER_CFG.img_size[1] - cropped_img_size[1])),
-                   int(c[0] + crop_from_y - (CENTER_CFG.img_size[0] - cropped_img_size[0]))) for c in coords]
+        coords = [(int(c[1]*(CENTER_CFG.cropping_size[1]/CENTER_CFG.img_size[1]) + crop_from_x - (CENTER_CFG.cropping_size[1] - cropped_img_size[1])),
+                   int(c[0]*(CENTER_CFG.cropping_size[0]/CENTER_CFG.img_size[0]) + crop_from_y - (CENTER_CFG.cropping_size[0] - cropped_img_size[0]))) for c in coords]
 
         self.predictions.append(coords[0])
 

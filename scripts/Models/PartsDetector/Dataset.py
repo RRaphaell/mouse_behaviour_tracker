@@ -14,7 +14,7 @@ class BuildDatasetParts(BuildDataset):
 
     def _crop_image(self, image, backbone_coordinates):
         x_center_original, y_center_original = backbone_coordinates
-        left_to_center, right_to_center = self.CFG.img_size[0] // 2, self.CFG.img_size[1] // 2
+        left_to_center, right_to_center = self.CFG.cropping_size[0] // 2, self.CFG.cropping_size[1] // 2
 
         shape_y = y_center_original - left_to_center if y_center_original > left_to_center else 0
         shape_x = x_center_original - right_to_center if x_center_original > right_to_center else 0
