@@ -13,7 +13,7 @@ def rescale_coord_for_orig_img(img, coords, img_size):
     height, width = img_size
     y_scale = img.shape[0] / height
     x_scale = img.shape[1] / width
-    coords = [(int(coord[1]*x_scale), int(coord[0]*y_scale)) for coord in coords]
+    coords = (int(coords[0][1]*x_scale), int(coords[0][0]*y_scale))
     return coords
 
 
@@ -23,8 +23,8 @@ def get_cropped_image(img, backbone_coordinates, img_size):
     x_center_original, y_center_original = backbone_coordinates
     left_to_center, right_to_center = height // 2, width // 2
 
-    crop_from_y = y_center_original - left_to_center if y_center_original > left_to_center else 0
-    crop_from_x = x_center_original - right_to_center if x_center_original > right_to_center else 0
+    crop_from_y = max(y_center_original - left_to_center, 0)
+    crop_from_x = max(x_center_original - right_to_center, 0)
     crop_to_y = y_center_original + right_to_center
     crop_to_x = x_center_original + left_to_center
 

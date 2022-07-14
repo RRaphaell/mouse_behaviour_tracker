@@ -18,6 +18,14 @@
     transform: translateX(-256px);
 }
 
+[data-testId="stVerticalBlock"] div:nth-of-type(8) {
+    width: 512px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+}
+
 [data-testId="stVerticalBlock"] div:nth-of-type(9) {
     display: flex;
     justify-content: center;
@@ -31,13 +39,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 704px;
-    /*height: 256px;*/
+    width: 512px;
     margin: auto;
 }
 
 .e1s6o5jp0 ul {
-    width: 704px;
+    width: 512px;
     text-align: center;
     margin: auto;
 }

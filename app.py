@@ -5,18 +5,23 @@ from scripts.config import CANVAS
 from scripts.utils import show_canvas_info, read_video
 
 
+# add page general config
 st.set_page_config(page_title="Mouse behavior analysis", page_icon="🐀", layout="wide")
 st.markdown("<h1 style='text-align: center; color: #FF8000;'>Mouse behavior analysis </h1>", unsafe_allow_html=True)
+
 
 # add styling
 with open('style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
+
 # Specify canvas parameters in application
 drawing_mode = st.sidebar.selectbox("Drawing tool:", ("rect", "circle", "transform"))
-file = st.sidebar.file_uploader("Upload video:", type=["mp4"])
 
+# create UI to uploading video
+file = st.sidebar.file_uploader("Upload video:", type=["mp4"])
 video, first_image = read_video(file)
+
 
 # Create center_layout canvas component
 canvas_result = st_canvas(
@@ -30,8 +35,12 @@ canvas_result = st_canvas(
     drawing_mode=drawing_mode,
     key="canvas")
 
+
 start_btn = st.button("Start")
+
+# show table of segments information
 objects = show_canvas_info(canvas_result)
+
 
 if start_btn:
     if not file:

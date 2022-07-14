@@ -13,7 +13,6 @@ class BuildDataset(torch.utils.data.Dataset):
         self.videos, self.images_path, self.annotations_dict = self.process_videos_info()
         self.images_path = self.images_path
         self.transforms = transform
-        self.img_size = config.img_size[0]
 
     def generate_image_and_masks(self, img_out_dir=Path("images"), mask_out_dir=Path("masks")):
         pass
