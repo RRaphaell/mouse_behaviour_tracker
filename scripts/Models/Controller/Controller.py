@@ -1,5 +1,6 @@
 import cv2
 import torch
+import numpy as np
 from scripts.Models.ModelBuilder import ModelBuilder
 from scripts.Models.CenterDetector.config import CFG as CENTER_CFG
 from scripts.Models.PartsDetector.config import CFG as PARTS_CFG
@@ -7,7 +8,7 @@ from scripts.Models.Controller.config import CFG as CONTROLLER_CFG
 from scripts.Models.Controller.utils import get_xy_of_preds, rescale_coord_for_orig_img, get_cropped_image
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
-import numpy as np
+from typing import List, Tuple
 
 
 class Controller:
@@ -46,7 +47,7 @@ class Controller:
         self.center_detector_model, self.parts_detector_model = self.build_models()
         self.predictions = []
 
-    def build_models(self):
+    def build_models(self) -> Tuple[torch.nn.Module, torch.nn.Module]:
         """build both center and part detector models.
         use custom unet or segmentation_models_pytorch"""
         model_builder = ModelBuilder(CENTER_CFG, use_my_model=True, pretrained_model_path=self.center_model_path)
@@ -57,7 +58,7 @@ class Controller:
 
         return center_detector_model, parts_detector_model
 
-    def prepare_img_for_center_detector(self, img):
+    def prepare_img_for_center_detector(self, img: np.ndarray) -> torch.Tensor:
         """image processing before predict center of image"""
         img = self.center_transforms(image=img)["image"]
         img = torch.unsqueeze(img[0], 0)
@@ -65,7 +66,7 @@ class Controller:
         img = torch.unsqueeze(img, 0)
         return img
 
-    def prepare_img_for_parts_detector(self, img):
+    def prepare_img_for_parts_detector(self, img: np.ndarray) -> torch.Tensor:
         """image processing before predict body parts of image"""
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.parts_transforms(image=img)["image"]
@@ -73,14 +74,14 @@ class Controller:
         img = img.to(CENTER_CFG.device, dtype=torch.float)
         return img
 
-    def _predict_img(self, img, is_part_detector):
+    def _predict_img(self, img: torch.Tensor, is_part_detector: bool) -> torch.Tensor:
         """run center or part predictions model based on is_part_detector value"""
         with torch.no_grad():
             pred = self.parts_detector_model(img) if is_part_detector else self.center_detector_model(img)
             pred = (torch.nn.Sigmoid()(pred) > 0.5).double()
         return pred.cpu().detach()
 
-    def predict_img(self, orig_img):
+    def predict_img(self, orig_img: np.ndarray) -> List[Tuple[int, int]]:
         """run both model. first to find centroid then crop image and run second model
         to predict body parts and return predicted coordinates"""
 

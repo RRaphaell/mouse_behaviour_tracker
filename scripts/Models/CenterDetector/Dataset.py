@@ -10,7 +10,9 @@ class BuildDatasetCenter(BuildDataset):
 
         self.generate_image_and_masks()
 
-    def get_mask(self, cords, frame):
+    def get_mask(self, cords: list, frame: np.ndarray) -> np.ndarray:
+        """this functions generates mask based on annotation"""
+
         output_y_size, output_x_size, _ = frame.shape
         mask = np.zeros((output_y_size, output_x_size, 1), dtype=np.uint8)
 
@@ -23,7 +25,9 @@ class BuildDatasetCenter(BuildDataset):
                     mask[j, i] = cm_c
         return mask
 
-    def generate_image_and_masks(self, img_out_dir=Path("images"), mask_out_dir=Path("masks")):
+    def generate_image_and_masks(self, img_out_dir=Path("images"), mask_out_dir=Path("masks")) -> None:
+        """this function creates images and masks folders and save them"""
+
         for video_name in self.CFG.videos_name:
             video = cv2.VideoCapture(str(self.CFG.video_dir / (video_name + ".mp4")))
             frames_path = img_out_dir / video_name

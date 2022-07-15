@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
+import pandas as pd
 from scripts.Models.Controller.Controller import Controller
 from scripts.config import KEYPOINT, SEGMENTS, CANVAS
 from scripts.utils import calculate_circle_center_cords
-from typing import Type
+from typing import Dict, List
 
 
 class Tracker:
@@ -16,7 +17,7 @@ class Tracker:
         segment_colors (dict[str, list[float]]): color for each unique segment
     """
 
-    def __init__(self, segments_df, segment_colors):
+    def __init__(self, segments_df: pd.DataFrame, segment_colors: Dict[str, List[float]]):
         """
         initialize tracker class with streamlit widgets and markdowns
 
@@ -29,16 +30,14 @@ class Tracker:
         self.segments_df = segments_df
         self.segment_colors = segment_colors
 
-    def _draw_keypoints(self, frame, coords):
+    def _draw_keypoints(self, frame: np.ndarray, coords: list) -> None:
         """draw model prediction keypoint"""
         for c in coords:
             if c != [0, 0]:  # if model doesn't predict any part it returns [0,0]
                 frame = cv2.circle(frame, c, KEYPOINT.radius, KEYPOINT.fill, -1)
 
-    def _draw_segments(self, img):
+    def _draw_segments(self, img: np.ndarray) -> np.ndarray:
         """Draw all segments on the video stream that were drawn on the canvas"""
-        if self.segments_df.empty:
-            return
 
         overlay = img.copy()
         for index, segment in self.segments_df.iterrows():
@@ -60,7 +59,7 @@ class Tracker:
 
         return img
 
-    def draw_predictions(self, frame):
+    def draw_predictions(self, frame: np.ndarray) -> np.ndarray:
         """draw all segments and predictions on video stream"""
         coords = self.controller.predict_img(frame)
         self._draw_keypoints(frame, coords)

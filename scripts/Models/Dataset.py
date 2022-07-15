@@ -23,6 +23,7 @@ class BuildDataset(torch.utils.data.Dataset):
         # will be implemented by child class
 
     def process_videos_info(self):
+        """this functions iterate all video paths and annotations to generate metadata from it"""
         videos = dict()
         images_path = []
         annotations_dict = dict()

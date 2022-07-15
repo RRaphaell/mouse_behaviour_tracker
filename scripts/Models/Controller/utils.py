@@ -1,14 +1,16 @@
+import numpy as np
 import torch
+from typing import List, Tuple
 
 
-def get_xy_of_preds(pred):
+def get_xy_of_preds(pred: torch.Tensor) -> List[torch.Tensor]:
     """we need single coordinate so this method return specific coordinate of predicted segment"""
     pred = torch.squeeze(pred, 0)
     coords = [(pred[i] == torch.max(pred[i])).nonzero()[0] for i in range(pred.shape[0])]
     return coords
 
 
-def rescale_coord_for_orig_img(img, coords, img_size):
+def rescale_coord_for_orig_img(img: np.ndarray, coords: list, img_size: Tuple[int, int]) -> Tuple[int, int]:
     """predicted image is in specific shape, this method rescaled predictions into original shape"""
     height, width = img_size
     y_scale = img.shape[0] / height
@@ -17,7 +19,7 @@ def rescale_coord_for_orig_img(img, coords, img_size):
     return coords
 
 
-def get_cropped_image(img, backbone_coordinates, img_size):
+def get_cropped_image(img: np.ndarray, backbone_coordinates: tuple, img_size: tuple) -> Tuple[np.ndarray, int, int]:
     """crop image from original frame based on backbone coordinate"""
     height, width = img_size
     x_center_original, y_center_original = backbone_coordinates
