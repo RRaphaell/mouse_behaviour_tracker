@@ -4,9 +4,9 @@ from pathlib import Path
 
 class CFG:
     model_name = 'Unet'
-    img_size = (160, 160)
+    img_size = (128, 128)
 
-    backbone = 'resnet50'
+    backbone = 'resnet34'
     weights = 'imagenet'
     decoder_channels = (256, 128, 64, 32, 16)
     encoder_depth = 5
@@ -19,11 +19,11 @@ class CFG:
     valid_bs = train_bs * 3
     n_epoch = 150
 
-    lr = 0.001
+    lr = 0.0002
     scheduler = 'CosineAnnealingLR'
     min_lr = 1e-6
-    T_max = int(400 / train_bs * n_epoch) + 50
-    T_0 = 25
+    T_max = int(800 / train_bs * n_epoch) + 50
+    T_0 = 50
     warmup_epochs = 0
     wd = 1e-6
 
