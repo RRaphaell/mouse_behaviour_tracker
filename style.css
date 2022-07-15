@@ -15,11 +15,11 @@
 
 [data-testId="stVerticalBlock"] div:nth-of-type(3) iframe {
     margin-left: 50%;
-    transform: translateX(-256px);
+    transform: translateX(-426px);
 }
 
 [data-testId="stVerticalBlock"] div:nth-of-type(8) {
-    width: 512px;
+    width: 852px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,8 +30,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 256px;
-    height: 256px;
     margin: auto;
 }
 
@@ -39,12 +37,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 512px;
+    width: 852px;
     margin: auto;
 }
 
 .e1s6o5jp0 ul {
-    width: 512px;
+    width: 852px;
     text-align: center;
     margin: auto;
 }

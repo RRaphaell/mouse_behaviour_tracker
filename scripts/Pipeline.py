@@ -51,13 +51,13 @@ class Pipeline:
             dashboard=Dashboard(),
             n_crossing=Bar(0, 0, 6, 8, minW=3, minH=4),
             time_spent=Pie(6, 0, 6, 8, minW=3, minH=4),
-            road_passed=Card(3, 8, 6, 12, minW=2, minH=4)
+            road_passed=Card(3, 8, 6, 14, minW=2, minH=4)
         )
 
         self.tracker = Tracker(segments_df, segment_colors)
         self.analyzer = Analyzer(video, segments_df, first_image, segment_colors, self.report)
         self.first_image = first_image
-        self.file_out, self.out = create_video_output_file(25.0, CANVAS.height, CANVAS.width)
+        self.file_out, self.out = create_video_output_file(25.0, CANVAS.width, CANVAS.height)
 
     def show_report(self) -> None:
         """this functions calls all functions to show reports"""
@@ -84,7 +84,7 @@ class Pipeline:
                 break
 
             img = self.tracker.draw_predictions(img)
-            self.out.write(np.array(img))
+            self.out.write(img)
 
         self.release_videos()
 

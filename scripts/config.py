@@ -22,8 +22,8 @@ class KEYPOINT:
 
 
 class CANVAS:
-    width = 512
-    height = 512
+    width = 852
+    height = 480
     fill_color = "rgba(255, 165, 0, 0.3)",
     stroke_width = 2
     stroke_color = "red"
