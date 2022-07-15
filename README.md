@@ -1,3 +1,4 @@
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://rraphaell-mouse-behaviour-tracker-app-so205q.streamlitapp.com/)
 
 [![Screenshot-from-2022-07-01-16-55-53.png](https://i.postimg.cc/SNLbm4ng/Screenshot-from-2022-07-01-16-55-53.png)](https://postimg.cc/GHp5jZJD)
 
