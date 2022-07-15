@@ -7,6 +7,7 @@ from scripts.Models.Controller.config import CFG as CONTROLLER_CFG
 from scripts.Models.Controller.utils import get_xy_of_preds, rescale_coord_for_orig_img, get_cropped_image
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
+import numpy as np
 
 
 class Controller:
@@ -37,8 +38,7 @@ class Controller:
             A.Normalize(),
             A.PadIfNeeded(CENTER_CFG.cropping_size[0], CENTER_CFG.cropping_size[1],
                           position=A.transforms.PadIfNeeded.PositionType.BOTTOM_RIGHT,
-                          border_mode=cv2.BORDER_CONSTANT,
-                          value=0, mask_value=0),
+                          border_mode=cv2.BORDER_REPLICATE),
             A.Resize(*PARTS_CFG.img_size, interpolation=cv2.INTER_NEAREST),
             ToTensorV2()
         ], p=1.0)
@@ -52,7 +52,7 @@ class Controller:
         model_builder = ModelBuilder(CENTER_CFG, use_my_model=True, pretrained_model_path=self.center_model_path)
         center_detector_model = model_builder.get_model()
 
-        model_builder = ModelBuilder(PARTS_CFG, use_my_model=True, pretrained_model_path=self.parts_model_path)
+        model_builder = ModelBuilder(PARTS_CFG, use_my_model=False, pretrained_model_path=self.parts_model_path)
         parts_detector_model = model_builder.get_model()
 
         return center_detector_model, parts_detector_model
@@ -67,6 +67,7 @@ class Controller:
 
     def prepare_img_for_parts_detector(self, img):
         """image processing before predict body parts of image"""
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.parts_transforms(image=img)["image"]
         img = torch.unsqueeze(img, 0)
         img = img.to(CENTER_CFG.device, dtype=torch.float)
@@ -82,6 +83,7 @@ class Controller:
     def predict_img(self, orig_img):
         """run both model. first to find centroid then crop image and run second model
         to predict body parts and return predicted coordinates"""
+
         # center detector
         img = self.prepare_img_for_center_detector(orig_img)
         center_pred = self._predict_img(img, is_part_detector=False)
