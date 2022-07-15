@@ -8,7 +8,7 @@ from scripts.utils import show_canvas_info, read_video
 def set_page_config():
     # add page general config
     st.set_page_config(page_title="Mouse behavior analysis", page_icon="🐀", layout="wide")
-    st.markdown("<h1 style='text-align: center; color: #FF8000;'>Mouse behavior analysis </h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #FF8000;'>Mouse behavior analysis 🐀 </h1>", unsafe_allow_html=True)
 
     # add styling
     with open('style.css') as f:
@@ -17,10 +17,10 @@ def set_page_config():
 
 def main():
     # Specify canvas parameters in application
-    drawing_mode = st.sidebar.selectbox("Drawing tool:", ("rect", "circle", "transform"))
+    drawing_mode = st.sidebar.selectbox("Drawing tool: 🖼", ("rect", "circle", "transform"))
 
     # create UI to uploading video
-    file = st.sidebar.file_uploader("Upload video:", type=["mp4"])
+    file = st.sidebar.file_uploader("Upload video: 💾", type=["mp4"])
 
     with st.sidebar:
         if not file:

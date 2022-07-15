@@ -63,7 +63,7 @@ class Tracker:
         """draw all segments and predictions on video stream"""
         coords = self.controller.predict_img(frame)
         self._draw_keypoints(frame, coords)
-        predicted_image = cv2.resize(frame, (CANVAS.height, CANVAS.width), interpolation=cv2.INTER_NEAREST)
+        predicted_image = cv2.resize(frame, (CANVAS.width, CANVAS.height), interpolation=cv2.INTER_NEAREST)
         predicted_image = self._draw_segments(predicted_image)
         return predicted_image
 

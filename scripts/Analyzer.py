@@ -62,7 +62,7 @@ class Analyzer:
             if (y, x) != [0, 0]:  # if model doesn't predict any part it returns [0,0]
                 self.first_image = cv2.circle(np.array(self.first_image), (x, y), 7, (255, 0, 0), -1)
 
-        self.first_image = cv2.resize(self.first_image, (CANVAS.height, CANVAS.width), interpolation=cv2.INTER_NEAREST)
+        self.first_image = cv2.resize(self.first_image, (CANVAS.width, CANVAS.height), interpolation=cv2.INTER_NEAREST)
 
         self.report.road_passed(self.first_image)
 
