@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import pandas as pd
 from scripts.Tracker import Tracker
 from scripts.Analyzer import Analyzer
 from scripts.utils import generate_segments_colors, create_video_output_file, convert_mp4_standard_format
@@ -8,6 +9,7 @@ from scripts.config import CANVAS
 import streamlit as st
 from types import SimpleNamespace
 from streamlit_elements import elements
+from typing import Callable
 
 
 class Pipeline:
@@ -18,13 +20,19 @@ class Pipeline:
     Attributes:
         file (st.file_uploader): uploaded file with streamlit widget
         video (cv2.VideoCapture): Video file to process.
+        frame_size (int): video frame size
         report: (SimpleNamespace): namespace which contains several streamlit_elements to show some behaviour analysis
         tracker (Tracker): adds segment and predictions to video stream
         analyzer (Analyzer): analyze predictions and show some results
         first_image (np.array): first image from video. Used as background for canvas and results placed on that also
     """
 
-    def __init__(self, video, segments_df, first_image, file):
+    def __init__(self,
+                 video: cv2.VideoCapture,
+                 segments_df: pd.DataFrame,
+                 first_image: np.ndarray,
+                 file: Callable
+                 ):
         """
         Initialize pipeline from video and segments information
 
@@ -51,7 +59,8 @@ class Pipeline:
         self.first_image = first_image
         self.file_out, self.out = create_video_output_file(25.0, CANVAS.height, CANVAS.width)
 
-    def show_report(self):
+    def show_report(self) -> None:
+        """this functions calls all functions to show reports"""
         st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
 
         predictions = np.array(self.tracker.get_predictions())
@@ -62,7 +71,7 @@ class Pipeline:
                 self.analyzer.show_elapsed_time_in_segments(predictions)
                 self.analyzer.show_n_crossing_in_segments(predictions)
 
-    def run(self):
+    def run(self) -> None:
         """this function runs video stream, use tracker to show segments, predictions and also analyzes them"""
 
         curr_frame_idx, progress_bar = 0, st.progress(0)
@@ -87,7 +96,8 @@ class Pipeline:
         # show tracked road, elapsed time in segments and etc
         self.show_report()
 
-    def release_videos(self):
+    def release_videos(self) -> None:
+        """call video destructors"""
         self.video.release()
         self.out.release()
         cv2.destroyAllWindows()

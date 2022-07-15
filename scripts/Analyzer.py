@@ -1,8 +1,12 @@
 import cv2
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from scripts.config import CANVAS
 from scripts.utils import calculate_circle_center_cords
+from types import SimpleNamespace
+from typing import Dict, List, Iterable
+
 
 plt.rcParams.update({
     "axes.facecolor":    (0.054, 0.066, 0.090, 1.0),  # same as streamlit dark style color
@@ -25,7 +29,13 @@ class Analyzer:
         report: (SimpleNamespace): namespace which contains several streamlit_elements to show some behaviour analysis
     """
 
-    def __init__(self, video, segments_df, first_image, segment_colors, report):
+    def __init__(self,
+                 video: cv2.VideoCapture,
+                 segments_df: pd.DataFrame,
+                 first_image: np.ndarray,
+                 segment_colors: Dict[str, List[float]],
+                 report: SimpleNamespace
+                 ):
         """
         initialize analyzer class with streamlit widgets and markdowns
 
@@ -46,7 +56,7 @@ class Analyzer:
         self.segment_colors = segment_colors
         self.report = report
 
-    def draw_tracked_road(self, predictions):
+    def draw_tracked_road(self, predictions: np.ndarray) -> None:
         """Draw the entire route covered by the mouse"""
         for x, y in predictions:
             if (y, x) != [0, 0]:  # if model doesn't predict any part it returns [0,0]
@@ -56,7 +66,7 @@ class Analyzer:
 
         self.report.road_passed(self.first_image)
 
-    def _count_elapsed_n_frames(self, segment, predictions):
+    def _count_elapsed_n_frames(self, segment: pd.Series, predictions: np.ndarray) -> Iterable:
         """count quantity of frames when mouse is in segment"""
         predictions = np.stack(predictions)
         x, y = predictions[:, 0], predictions[:, 1]
@@ -75,7 +85,7 @@ class Analyzer:
 
         return is_in_segment
 
-    def _count_elapsed_time_in_segments(self, predictions):
+    def _count_elapsed_time_in_segments(self, predictions: np.ndarray) -> None:
         """Count the number of frames and the amount of time spent when the mouse is in a segment"""
         if self.segments_df.empty:
             return
@@ -87,7 +97,7 @@ class Analyzer:
         self.segments_df['elapsed_sec%'] = self.segments_df['elapsed_n_frames'].apply(
             lambda n_frames: n_frames/self.num_frames*100)
 
-    def show_elapsed_time_in_segments(self, predictions):
+    def show_elapsed_time_in_segments(self, predictions: np.ndarray) -> None:
         """count elapsed time in each segment and plot bars"""
 
         self._count_elapsed_time_in_segments(predictions)
@@ -99,7 +109,7 @@ class Analyzer:
 
         self.report.time_spent(df)
 
-    def show_n_crossing_in_segments(self, predictions):
+    def show_n_crossing_in_segments(self, predictions: np.ndarray) -> None:
         """count number of crossing in each segment and plot bars"""
 
         self.segments_df['n_crossing'] = self.segments_df.apply(

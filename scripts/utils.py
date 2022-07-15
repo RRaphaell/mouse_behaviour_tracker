@@ -7,9 +7,10 @@ import streamlit as st
 from PIL import Image
 from st_aggrid import AgGrid    # for editable dataframe
 from scripts.config import COLOR_PALETTE
+from typing import Tuple
 
 
-def show_canvas_info(canvas_result):
+def show_canvas_info(canvas_result) -> pd.DataFrame:
     """
     creates dataframe object from segments drawn on the canvas.
     each row is a segment information such as coordinates, radius etc.
@@ -45,7 +46,7 @@ def show_canvas_info(canvas_result):
     return objects
 
 
-def read_video(file):
+def read_video(file) -> Tuple[cv2.VideoCapture, Image.Image]:
     """
     create cv2 video object from uploaded file
 
@@ -71,21 +72,21 @@ def read_video(file):
     return video, first_image
 
 
-def calculate_circle_center_cords(segment):
+def calculate_circle_center_cords(segment: pd.Series) -> Tuple[int, int]:
     """calculate circle center based on radius, angle and corner coordinates using pythagorean theorem"""
     center_x = segment["left"] + segment["radius"] * np.cos(np.deg2rad(segment["angle"]))
     center_y = segment["top"] + segment["radius"] * np.sin(np.deg2rad(segment["angle"]))
     return center_x, center_y
 
 
-def rgba_0_1_to_0_255(color_palette):
-    color_palette = np.maximum(0, np.minimum(255, (color_palette * 256.0).astype(int)))
-    return color_palette
-
-
-def rgba_0_255_to_0_1(color_palette):
-    color_palette = np.array(list(color_palette))/255
-    return color_palette
+# def rgba_0_1_to_0_255(color_palette):
+#     color_palette = np.maximum(0, np.minimum(255, (color_palette * 256.0).astype(int)))
+#     return color_palette
+#
+#
+# def rgba_0_255_to_0_1(color_palette):
+#     color_palette = np.array(list(color_palette))/255
+#     return color_palette
 
 
 def color_to_rgb_str():
@@ -98,24 +99,24 @@ def color_to_hex():
     return color_palette
 
 
-def generate_segments_colors(segments_df):
+def generate_segments_colors(segments_df: pd.DataFrame) -> dict:
     """generate different colors for each unique segments"""
     color_palette = np.array(COLOR_PALETTE)
-    color_palette[:, [2, 0]] = color_palette[:, [0, 2]]         # video writer converts rgb2gbr
-    transparency = np.full((color_palette.shape[0], 1), 100)    # transparency array
+    color_palette[:, [2, 0]] = color_palette[:, [0, 2]]             # video writer converts rgb2gbr
+    transparency = np.full((color_palette.shape[0], 1), 100)        # transparency array
     color_palette = np.append(color_palette, transparency, axis=1)  # add transparency to color_palette
     segment_colors = dict(zip(segments_df["segment key"].unique(), color_palette))
     return segment_colors
 
 
-def create_video_output_file(frame_rate, height, width):
+def create_video_output_file(frame_rate: int, height: int, width: int) -> Tuple[tempfile.NamedTemporaryFile, cv2.VideoWriter]:
     file_out = tempfile.NamedTemporaryFile(suffix='.mp4')
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(file_out.name, fourcc, frame_rate, (height, width))
     return file_out, out
 
 
-def convert_mp4_standard_format(file_out):
+def convert_mp4_standard_format(file_out: tempfile.NamedTemporaryFile):
     os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f mp4 {file_out.name}_new")
     video_file = open(f"{file_out.name}_new", "rb")
     return video_file
