@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from scripts.Pipeline import Pipeline
 from scripts.config import CANVAS
-from scripts.utils import show_canvas_info, read_video
+from scripts.utils import show_canvas_info, read_video, read_markdown
 
 
 def set_page_config():
@@ -25,13 +25,10 @@ def main():
     with st.sidebar:
         if not file:
             st.warning("upload video \t ⚠️")
+        # About
+        st.markdown(read_markdown("docs/about.md"), unsafe_allow_html=True)
 
-        st.markdown("---")
-        st.markdown(
-            '<h6>Made in &nbsp<img src="https://streamlit.io/images/brand/streamlit-mark-color.png" alt="Streamlit logo" height="16">&nbsp by: <br> <a href="https://twitter.com/RaphaelKalan">@RaphaelKalan</a> <br> <a href="https://twitter.com/TatiaTsmindash1">@TatiaTsmindash</a></h6>',
-            unsafe_allow_html=True)
-
-    video, first_image = read_video(file)
+    video, video_params, first_image = read_video(file)
 
     # Create center_layout canvas component
     canvas_result = st_canvas(
@@ -56,8 +53,8 @@ def main():
         elif objects.empty:
             st.warning("add at least one segment on canvas")  # if the user did not add the segment at all
         else:
-            pipeline = Pipeline(video, objects, first_image, file)
-            pipeline.run()
+            pipeline = Pipeline(video_params, objects, first_image)
+            pipeline.run(video)
 
 
 if __name__ == "__main__":

@@ -23,14 +23,14 @@ class Analyzer:
         first_image (np.ndarray): first image of the video. Used as background for canvas and results placed on that also
         num_frames (int): number of frames in the video
         frame_width (int): video frames width
-        frame_heigt (int): video frames height
+        frame_height (int): video frames height
         frames_per_second (float): number of frames per second
         segment_colors (dict[str, list[float]]): color for each unique segment
         report: (SimpleNamespace): namespace which contains several streamlit_elements to show some behaviour analysis
     """
 
     def __init__(self,
-                 video: cv2.VideoCapture,
+                 video_params: dict,
                  segments_df: pd.DataFrame,
                  first_image: np.ndarray,
                  segment_colors: Dict[str, List[float]],
@@ -40,7 +40,7 @@ class Analyzer:
         initialize analyzer class with streamlit widgets and markdowns
 
         args:
-            video (cv2.VideoCapture): Video file to process.
+            video_params (dict): dictionary of video parameters like frame number width height
             segments_df (pd.Dataframe): dataframe of segments information
             first_image (np.ndarray): first image of the video. Used as background for canvas and results placed on that also
             segment_colors (dict[str, list[float]]): color for each unique segment
@@ -49,10 +49,10 @@ class Analyzer:
 
         self.segments_df = segments_df
         self.first_image = first_image
-        self.num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.frame_width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.frame_heigt = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.frames_per_second = video.get(cv2.CAP_PROP_FPS)
+        self.num_frames = video_params["num_frames"]
+        self.frame_width = video_params["frame_width"]
+        self.frame_height = video_params["frame_height"]
+        self.frames_per_second = video_params["frames_per_second"]
         self.segment_colors = segment_colors
         self.report = report
 
@@ -71,7 +71,7 @@ class Analyzer:
         predictions = np.stack(predictions)
         x, y = predictions[:, 0], predictions[:, 1]
         x = x * CANVAS.width / self.frame_width
-        y = y * CANVAS.height / self.frame_heigt
+        y = y * CANVAS.height / self.frame_height
         
         if segment["type"] == "rect":
             x1, y1 = segment["left"], segment["top"]
