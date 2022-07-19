@@ -3,11 +3,17 @@ import cv2
 import numpy as np
 import pandas as pd
 import tempfile
+from pathlib import Path
 import streamlit as st
+import PIL
 from PIL import Image
 from st_aggrid import AgGrid    # for editable dataframe
 from scripts.config import COLOR_PALETTE
 from typing import Tuple
+
+
+def read_markdown(markdown_file):
+    return Path(markdown_file).read_text()
 
 
 def show_canvas_info(canvas_result) -> pd.DataFrame:
@@ -46,7 +52,7 @@ def show_canvas_info(canvas_result) -> pd.DataFrame:
     return objects
 
 
-def read_video(file) -> Tuple[cv2.VideoCapture, Image.Image]:
+def read_video(file) -> Tuple[cv2.VideoCapture, dict, PIL.Image.Image]:
     """
     create cv2 video object from uploaded file
 
@@ -58,10 +64,10 @@ def read_video(file) -> Tuple[cv2.VideoCapture, Image.Image]:
         np.ndarray: first image of the video
     """
 
-    video, first_image = None, None
+    video, video_params, first_image = None, None, None
 
     if file:
-        t_file = tempfile.NamedTemporaryFile(delete=False)
+        t_file = tempfile.NamedTemporaryFile()
         t_file.write(file.read())
         video = cv2.VideoCapture(t_file.name)
         _, first_image = video.read()
@@ -69,7 +75,12 @@ def read_video(file) -> Tuple[cv2.VideoCapture, Image.Image]:
         first_image = cv2.cvtColor(first_image, cv2.COLOR_BGR2RGB)
         first_image = Image.fromarray(first_image)
 
-    return video, first_image
+        video_params = {"num_frames": int(video.get(cv2.CAP_PROP_FRAME_COUNT)),
+                        "frame_width": int(video.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                        "frame_height": int(video.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+                        "frames_per_second": video.get(cv2.CAP_PROP_FPS)}
+
+    return video, video_params, first_image
 
 
 def calculate_circle_center_cords(segment: pd.Series) -> Tuple[int, int]:
@@ -77,16 +88,6 @@ def calculate_circle_center_cords(segment: pd.Series) -> Tuple[int, int]:
     center_x = segment["left"] + segment["radius"] * np.cos(np.deg2rad(segment["angle"]))
     center_y = segment["top"] + segment["radius"] * np.sin(np.deg2rad(segment["angle"]))
     return center_x, center_y
-
-
-# def rgba_0_1_to_0_255(color_palette):
-#     color_palette = np.maximum(0, np.minimum(255, (color_palette * 256.0).astype(int)))
-#     return color_palette
-#
-#
-# def rgba_0_255_to_0_1(color_palette):
-#     color_palette = np.array(list(color_palette))/255
-#     return color_palette
 
 
 def color_to_rgb_str():
@@ -109,7 +110,7 @@ def generate_segments_colors(segments_df: pd.DataFrame) -> dict:
     return segment_colors
 
 
-def create_video_output_file(frame_rate: int, height: int, width: int) -> Tuple[tempfile.NamedTemporaryFile, cv2.VideoWriter]:
+def create_video_output_file(frame_rate: float, height: int, width: int) -> Tuple[tempfile.NamedTemporaryFile, cv2.VideoWriter]:
     file_out = tempfile.NamedTemporaryFile(suffix='.mp4')
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(file_out.name, fourcc, frame_rate, (height, width))

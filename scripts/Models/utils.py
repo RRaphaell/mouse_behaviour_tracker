@@ -5,8 +5,8 @@ import torch
 
 
 def set_seed(seed=42):
-    '''Sets the seed of the entire notebook so results are the same every time we run.
-    This is for REPRODUCIBILITY.'''
+    """Sets the seed of the entire notebook so results are the same every time we run.
+    This is for REPRODUCIBILITY."""
     np.random.seed(seed)
     random.seed(seed)
     torch.manual_seed(seed)

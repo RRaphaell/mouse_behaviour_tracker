@@ -33,8 +33,7 @@ class Tracker:
     def _draw_keypoints(self, frame: np.ndarray, coords: list) -> None:
         """draw model prediction keypoint"""
         for c in coords:
-            if c != [0, 0]:  # if model doesn't predict any part it returns [0,0]
-                frame = cv2.circle(frame, c, KEYPOINT.radius, KEYPOINT.fill, -1)
+            frame = cv2.circle(frame, c, KEYPOINT.radius, KEYPOINT.fill, -1)
 
     def _draw_segments(self, img: np.ndarray) -> np.ndarray:
         """Draw all segments on the video stream that were drawn on the canvas"""

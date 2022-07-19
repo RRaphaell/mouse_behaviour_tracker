@@ -9,7 +9,6 @@ from scripts.config import CANVAS
 import streamlit as st
 from types import SimpleNamespace
 from streamlit_elements import elements
-from typing import Callable
 
 
 class Pipeline:
@@ -18,35 +17,28 @@ class Pipeline:
     It runs the video, makes predictions for each frame, and analyzes the results.
 
     Attributes:
-        file (st.file_uploader): uploaded file with streamlit widget
-        video (cv2.VideoCapture): Video file to process.
-        frame_size (int): video frame size
+        num_frames (int): video frame size
         report: (SimpleNamespace): namespace which contains several streamlit_elements to show some behaviour analysis
         tracker (Tracker): adds segment and predictions to video stream
         analyzer (Analyzer): analyze predictions and show some results
-        first_image (np.array): first image from video. Used as background for canvas and results placed on that also
     """
 
     def __init__(self,
-                 video: cv2.VideoCapture,
+                 video_params: dict,
                  segments_df: pd.DataFrame,
                  first_image: np.ndarray,
-                 file: Callable
                  ):
         """
         Initialize pipeline from video and segments information
 
         Args:
-            video (cv2.VideoCapture): Video file to process.
+            video_params (dict): dictionary of video parameters like frame number width height.
             segments_df (pd.DataFrame): dataframe of segments information
             first_image (np.ndarray): first image of the video
-            file (st.file_uploader): uploaded file with streamlit widget
         """
 
         segment_colors = generate_segments_colors(segments_df)
-        self.file = file
-        self.video = video
-        self.frame_size = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.num_frames = video_params["num_frames"]
         self.report = SimpleNamespace(
             dashboard=Dashboard(),
             n_crossing=Bar(0, 0, 6, 8, minW=3, minH=4),
@@ -55,9 +47,9 @@ class Pipeline:
         )
 
         self.tracker = Tracker(segments_df, segment_colors)
-        self.analyzer = Analyzer(video, segments_df, first_image, segment_colors, self.report)
-        self.first_image = first_image
         self.file_out, self.out = create_video_output_file(25.0, CANVAS.width, CANVAS.height)
+
+        self.analyzer = Analyzer(video_params, segments_df, first_image, segment_colors, self.report)
 
     def show_report(self) -> None:
         """this functions calls all functions to show reports"""
@@ -71,14 +63,14 @@ class Pipeline:
                 self.analyzer.show_elapsed_time_in_segments(predictions)
                 self.analyzer.show_n_crossing_in_segments(predictions)
 
-    def run(self) -> None:
+    def run(self, video: cv2.VideoCapture) -> None:
         """this function runs video stream, use tracker to show segments, predictions and also analyzes them"""
 
         curr_frame_idx, progress_bar = 0, st.progress(0)
         while True:
-            success, img = self.video.read()
+            success, img = video.read()
             curr_frame_idx += 1
-            progress_bar.progress(curr_frame_idx / self.frame_size)
+            progress_bar.progress(curr_frame_idx / self.num_frames)
             if not success:
                 progress_bar.empty()
                 break
@@ -98,6 +90,5 @@ class Pipeline:
 
     def release_videos(self) -> None:
         """call video destructors"""
-        self.video.release()
         self.out.release()
         cv2.destroyAllWindows()
