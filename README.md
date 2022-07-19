@@ -12,6 +12,10 @@ This project aims to automate the tracking of rats' behavior.
 We use deep learning to track a rats position and analyze it based on that information. <br>
 Using the canvas, you can draw segments and it generates a video marked the rats' bodies parts and also making some statistics, such as the time spent in each segment, number of segments crossings, and visualization of the entire path. (in the future, we might add some analysis)
 
+
+https://user-images.githubusercontent.com/74569835/179845647-7773e224-a42a-4deb-9d32-17e46b8ac8da.mp4
+
+
 ## **How to use**
 you can just open the [website](https://rraphaell-mouse-behaviour-tracker-app-so205q.streamlitapp.com/) and upload the video you want to track, or use our example if you just want to see how it works.<br>
 Draw all segments on the canvas and click the start button to generate the report.<br>
