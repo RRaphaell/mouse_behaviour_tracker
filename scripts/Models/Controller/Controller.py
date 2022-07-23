@@ -102,7 +102,8 @@ class Controller:
         coords = [(int(c[1]*(CENTER_CFG.cropping_size[1]/CENTER_CFG.img_size[1]) + crop_from_x - (CENTER_CFG.cropping_size[1] - cropped_img_size[1])),
                    int(c[0]*(CENTER_CFG.cropping_size[0]/CENTER_CFG.img_size[0]) + crop_from_y - (CENTER_CFG.cropping_size[0] - cropped_img_size[0]))) for c in coords if not torch.all(c.eq(torch.tensor([0,0])))]
 
-        self.predictions.append(coords[0])
+        if len(coords):
+            self.predictions.append(coords[0])
 
         return coords
 
