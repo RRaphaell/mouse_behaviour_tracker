@@ -31,16 +31,16 @@ class Controller:
 
         self.center_transforms = A.Compose([
             A.Resize(*CENTER_CFG.img_size, interpolation=cv2.INTER_NEAREST),
-            A.Normalize(),
+            A.Normalize(mean=(0.0465, 0.2107, 0.4492), std=(0.9863, 1.0076, 0.9900)),
             ToTensorV2()
         ], p=1.0)
 
         self.parts_transforms = A.Compose([
-            A.Normalize(),
             A.PadIfNeeded(CENTER_CFG.cropping_size[0], CENTER_CFG.cropping_size[1],
                           position=A.transforms.PadIfNeeded.PositionType.BOTTOM_RIGHT,
                           border_mode=cv2.BORDER_REPLICATE),
             A.Resize(*PARTS_CFG.img_size, interpolation=cv2.INTER_NEAREST),
+            A.Normalize(mean=(0.0465, 0.2107, 0.4492), std=(0.9863, 1.0076, 0.9900)),
             ToTensorV2()
         ], p=1.0)
 
@@ -61,9 +61,8 @@ class Controller:
     def prepare_img_for_center_detector(self, img: np.ndarray) -> torch.Tensor:
         """image processing before predict center of image"""
         img = self.center_transforms(image=img)["image"]
-        img = torch.unsqueeze(img[0], 0)
-        img = img.to(CENTER_CFG.device, dtype=torch.float)
         img = torch.unsqueeze(img, 0)
+        img = img.to(CENTER_CFG.device, dtype=torch.float)
         return img
 
     def prepare_img_for_parts_detector(self, img: np.ndarray) -> torch.Tensor:
@@ -98,6 +97,7 @@ class Controller:
         parts_pred = self._predict_img(center_cropped_image, is_part_detector=True)
         coords = get_xy_of_preds(parts_pred)
 
+        del coords[1]   # remove center
         # rescale coords to orig image
         coords = [(int(c[1]*(CENTER_CFG.cropping_size[1]/CENTER_CFG.img_size[1]) + crop_from_x - (CENTER_CFG.cropping_size[1] - cropped_img_size[1])),
                    int(c[0]*(CENTER_CFG.cropping_size[0]/CENTER_CFG.img_size[0]) + crop_from_y - (CENTER_CFG.cropping_size[0] - cropped_img_size[0]))) for c in coords if not torch.all(c.eq(torch.tensor([0,0])))]
