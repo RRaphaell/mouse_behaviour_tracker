@@ -5,7 +5,7 @@ from pathlib import Path
 class CFG:
     model_name = 'Unet'
     img_size = (128, 128)
-    cropping_size = (416, 416)
+    cropping_size = (480, 480)
 
     backbone = 'resnet18'
     weights = 'imagenet'
@@ -13,7 +13,7 @@ class CFG:
     encoder_depth = 5
     activation = None
 
-    in_channels = 1
+    in_channels = 3
     num_classes = 1
 
     train_bs = 16
