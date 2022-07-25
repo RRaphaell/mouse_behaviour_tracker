@@ -1,6 +1,7 @@
 from scripts.Models.UNet import UNet
 import torch
 import segmentation_models_pytorch as smp
+import streamlit as st
 
 
 class ModelBuilder:
@@ -29,7 +30,7 @@ class ModelBuilder:
         model.to(self.CFG.device)
         return model
 
-    # @st.cache(hash_funcs={"MyUnhashableClass": lambda _: None}, allow_output_mutation=True)
+    @st.cache(hash_funcs={"MyUnhashableClass": lambda _: None}, allow_output_mutation=True)
     def load_model(self):
         model = self.build_model()
         model.load_state_dict(torch.load(self.pretrained_model_path, map_location=self.CFG.device))
