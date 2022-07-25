@@ -18,7 +18,7 @@
     transform: translateX(-426px);
 }
 
-[data-testId="stVerticalBlock"] div:nth-of-type(8) {
+[data-testId="stVerticalBlock"] div:nth-of-type(7) {
     width: 852px;
     display: flex;
     align-items: center;
@@ -26,7 +26,8 @@
     margin: auto;
 }
 
-[data-testId="stVerticalBlock"] div:nth-of-type(9) {
+[data-testId="stVerticalBlock"] div:nth-of-type(10) {
+    width: 852px;
     display: flex;
     justify-content: center;
     align-items: center;
