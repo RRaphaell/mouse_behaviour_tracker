@@ -17,7 +17,7 @@ class SEGMENTS:
 
 
 class KEYPOINT:
-    radius = 5
+    radius = 7
     fill = (0, 0, 255)
 
 
