@@ -114,4 +114,5 @@ tatiatsmindashvili@gmail.com
 
 
 ## **License**
+this app is released under a [Clear BSD License](https://raw.githubusercontent.com/RRaphaell/mouse_behaviour_tracker/main/License?token=GHSAT0AAAAAABQA3BDY464XCOWQKCSQ3RUCYXBTB6Q) and is intended for research/academic use only
 
