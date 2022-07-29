@@ -121,6 +121,5 @@ def create_video_output_file(frame_rate: float, height: int, width: int) -> Tupl
 def convert_mp4_standard_format(file_out: tempfile.NamedTemporaryFile):
     os.system(f"ffmpeg -i -y {file_out.name} -c:v libx264 -c:a copy -f mp4 temp")
     video_file = open(f"temp", "rb")
-    os.remove(file_out.name)
     gc.collect()
     return video_file
