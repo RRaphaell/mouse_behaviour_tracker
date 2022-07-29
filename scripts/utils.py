@@ -130,11 +130,11 @@ def list_files(startpath):
 
 def convert_mp4_standard_format(file_out: tempfile.NamedTemporaryFile):
     print(file_out.name)
-    os.makedirs("videos")
-    os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f mp4 -y /videos/generated_video")
-    try:
-        video_file = open("/videos/generated_video.mp4", "rb")
-    except:
-        video_file = open("generated_video.mp4", "rb")
+    if not os.path.exists('videos'):
+        os.makedirs("videos")
+    os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f mp4 -y videos/generated_video")
+    video_file = open("videos/generated_video", "rb")
+    # except:
+    #     video_file = open("generated_video", "rb")
     gc.collect()
     return video_file
