@@ -118,8 +118,21 @@ def create_video_output_file(frame_rate: float, height: int, width: int) -> Tupl
     return file_out, out
 
 
+def list_files(startpath):
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        print('{}{}/'.format(indent, os.path.basename(root)))
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            print('{}{}'.format(subindent, f))
+
+
 def convert_mp4_standard_format(file_out: tempfile.NamedTemporaryFile):
+    print(file_out.name)
+    print(os.listdir())
+    list_files(".")
     os.system(f"ffmpeg -i -y {file_out.name} -c:v libx264 -c:a copy -f mp4 generated_video")
-    video_file = open("/home/appuser/venv/lib/python3.8/site-packages/streamlit_elements/frontend/build/generated_video.mp4", "rb")
+    video_file = open("/home/generated_video.mp4", "rb")
     gc.collect()
     return video_file
