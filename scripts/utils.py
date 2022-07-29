@@ -130,7 +130,6 @@ def list_files(startpath):
 
 def convert_mp4_standard_format(file_out: tempfile.NamedTemporaryFile):
     print(file_out.name)
-    print(os.listdir("~"))
     os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f -y mp4 generated_video")
     try:
         video_file = open("/tmp/generated_video.mp4", "rb")
