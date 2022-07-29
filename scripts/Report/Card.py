@@ -9,7 +9,7 @@ class Card(Dashboard.Item):
     def __call__(self, image):
 
         im = Image.fromarray(np.array(image))
-        im.save("/home/appuser/venv/lib/python3.8/site-packages/streamlit_elements/frontend/build/temp.png")
+        im.save("temp.png")
 
         with mui.Card(key=self._key, sx={"display": "flex", "flexDirection": "column", "borderRadius": 3, "overflow": "hidden"}, elevation=1):
             mui.CardHeader(
