@@ -1,4 +1,5 @@
 import os
+import gc
 import cv2
 import numpy as np
 import pandas as pd
@@ -118,6 +119,7 @@ def create_video_output_file(frame_rate: float, height: int, width: int) -> Tupl
 
 
 def convert_mp4_standard_format(file_out: tempfile.NamedTemporaryFile):
-    os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f mp4 {file_out.name}_new")
-    video_file = open(f"{file_out.name}_new", "rb")
+    os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f mp4 temp")
+    video_file = open(f"temp", "rb")
+    gc.collect()
     return video_file

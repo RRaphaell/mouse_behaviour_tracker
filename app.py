@@ -1,3 +1,4 @@
+import gc
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from scripts.Pipeline import Pipeline
@@ -66,6 +67,7 @@ def main():
         else:
             pipeline = Pipeline(video_params, objects, first_image)
             pipeline.run(video)
+            gc.collect()
 
 
 if __name__ == "__main__":
