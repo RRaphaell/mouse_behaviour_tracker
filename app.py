@@ -1,8 +1,12 @@
+import gc
+import pandas as pd
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from scripts.Pipeline import Pipeline
 from scripts.config import CANVAS
 from scripts.utils import show_canvas_info, read_video, read_markdown
+from streamlit import session_state
+from streamlit_elements import elements
 
 
 def set_page_config():
@@ -66,6 +70,24 @@ def main():
         else:
             pipeline = Pipeline(video_params, objects, first_image)
             pipeline.run(video)
+            gc.collect()
+
+    if "report" in session_state:
+        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
+        st.video(session_state.generated_video)
+
+        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
+        report = session_state.report
+        crossing_df = session_state.crossing_df
+        time_df = session_state.time_df
+        tracked_road = session_state.tracked_road
+        predictions = session_state.predictions
+
+        with elements("demo"):
+            with report.dashboard(rowHeight=57):
+                report.road_passed(pd.DataFrame(predictions, columns=["x", "y"]), tracked_road)
+                report.time_spent(time_df)
+                report.n_crossing(crossing_df)
 
 
 if __name__ == "__main__":
