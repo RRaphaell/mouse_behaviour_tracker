@@ -25,5 +25,5 @@ def get_table_download_link(df):
 
 def download_file(df):
     url = get_table_download_link(df)
-    st.write(url)
-    webbrowser.open(url, new=1, autoraise=True)
+    # webbrowser.open(url, new=1, autoraise=True)
+    webbrowser.open_new_tab(url)
