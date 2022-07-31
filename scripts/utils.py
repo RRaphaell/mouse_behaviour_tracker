@@ -76,7 +76,8 @@ def read_video(file) -> Tuple[cv2.VideoCapture, dict, PIL.Image.Image]:
         first_image = cv2.cvtColor(first_image, cv2.COLOR_BGR2RGB)
         first_image = Image.fromarray(first_image)
 
-        video_params = {"num_frames": int(video.get(cv2.CAP_PROP_FRAME_COUNT)),
+        video_params = {"video_name": file.name,
+                        "num_frames": int(video.get(cv2.CAP_PROP_FRAME_COUNT)),
                         "frame_width": int(video.get(cv2.CAP_PROP_FRAME_WIDTH)),
                         "frame_height": int(video.get(cv2.CAP_PROP_FRAME_HEIGHT)),
                         "frames_per_second": video.get(cv2.CAP_PROP_FPS)}
