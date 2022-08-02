@@ -1,3 +1,6 @@
+import base64
+
+
 def df_to_dict(df, col):
     data = []
     for index, row in df.iterrows():
@@ -6,3 +9,14 @@ def df_to_dict(df, col):
                      "value": round(row[col], 3)})
 
     return data
+
+
+def get_table_download_link(df):
+    """Generates a link allowing the data in a given panda dataframe to be downloaded
+    in:  dataframe
+    out: href string
+    """
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
+    href = f'data:file/csv;base64,{b64}'
+    return href

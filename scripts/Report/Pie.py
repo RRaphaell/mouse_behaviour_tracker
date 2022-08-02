@@ -1,6 +1,6 @@
 from streamlit_elements import nivo, mui
 from scripts.Report.Dashboard import Dashboard
-from .utils import df_to_dict
+from .utils import df_to_dict, get_table_download_link
 from scripts.utils import color_to_rgb_str
 
 
@@ -23,7 +23,7 @@ class Pie(Dashboard.Item):
         data_dict = df_to_dict(data, col="elapsed_sec%")
 
         with mui.Paper(key=self._key, sx={"display": "flex", "flexDirection": "column", "borderRadius": 3, "overflow": "hidden"}, elevation=1):
-            with self.title_bar():
+            with self.title_bar(get_table_download_link(data[["segment key", "elapsed_sec%"]])):
                 mui.icon.PieChart()
                 mui.Typography("Time spent in the segment", sx={"flex": 1})
 

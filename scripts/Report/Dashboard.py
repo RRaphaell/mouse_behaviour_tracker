@@ -30,7 +30,7 @@ class Dashboard:
             self._dark_mode = not self._dark_mode
 
         @contextmanager
-        def title_bar(self, padding="5px 15px 5px 15px", dark_switcher=True):
+        def title_bar(self, url, padding="5px 15px 5px 15px"):
             with mui.Stack(
                 className=self._draggable_class,
                 alignItems="center",
@@ -44,11 +44,7 @@ class Dashboard:
             ):
                 yield
 
-                if dark_switcher:
-                    if self._dark_mode:
-                        mui.IconButton(mui.icon.Download, onClick=self._switch_theme)
-                    else:
-                        mui.IconButton(mui.icon.LightMode, sx={"color": "#ffc107"}, onClick=self._switch_theme)
+                mui.IconButton(mui.icon.Download, href=url)
 
         @abstractmethod
         def __call__(self):
