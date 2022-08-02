@@ -6,6 +6,7 @@ from scripts.config import CANVAS
 from scripts.utils import calculate_circle_center_cords
 from types import SimpleNamespace
 from typing import Dict, List, Iterable
+from streamlit import session_state
 
 
 plt.rcParams.update({
@@ -64,7 +65,9 @@ class Analyzer:
 
         self.first_image = cv2.resize(self.first_image, (CANVAS.width, CANVAS.height), interpolation=cv2.INTER_NEAREST)
 
-        self.report.road_passed(self.first_image)
+        session_state["tracked_road"] = self.first_image
+        session_state["predictions"] = predictions
+        self.report.road_passed(pd.DataFrame(predictions, columns=["x", "y"]), self.first_image)
 
     def _count_elapsed_n_frames(self, segment: pd.Series, predictions: np.ndarray) -> Iterable:
         """count quantity of frames when mouse is in segment"""
@@ -107,6 +110,7 @@ class Analyzer:
         df = self.segments_df.drop_duplicates(subset=['segment key', 'elapsed_sec%'])
         df = df.append({'segment key': "Other", 'elapsed_sec%': 100-df["elapsed_sec%"].sum()}, ignore_index=True)
 
+        session_state["time_df"] = df
         self.report.time_spent(df)
 
     def show_n_crossing_in_segments(self, predictions: np.ndarray) -> None:
@@ -119,4 +123,5 @@ class Analyzer:
         self.segments_df["n_crossing"] = self.segments_df.groupby('segment key')["n_crossing"].transform('sum')
         df = self.segments_df.drop_duplicates(subset=['segment key', 'n_crossing'])
 
+        session_state["crossing_df"] = df
         self.report.n_crossing(df)

@@ -9,6 +9,7 @@ from scripts.config import CANVAS
 import streamlit as st
 from types import SimpleNamespace
 from streamlit_elements import elements
+from streamlit import session_state
 
 
 class Pipeline:
@@ -45,6 +46,9 @@ class Pipeline:
             time_spent=Pie(6, 0, 6, 8, minW=3, minH=4),
             road_passed=Card(3, 8, 6, 14, minW=2, minH=4)
         )
+
+        session_state["report"] = self.report
+        session_state["video_name"] = video_params["video_name"]
 
         self.tracker = Tracker(segments_df, segment_colors)
         self.file_out, self.out = create_video_output_file(25.0, CANVAS.width, CANVAS.height)
@@ -84,6 +88,7 @@ class Pipeline:
         st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
         video_file = convert_mp4_standard_format(self.file_out)
         st.video(video_file)
+        session_state["generated_video"] = video_file
 
         # show tracked road, elapsed time in segments and etc
         self.show_report()
