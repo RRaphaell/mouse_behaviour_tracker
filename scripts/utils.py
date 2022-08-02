@@ -1,4 +1,5 @@
 import os
+import gc
 import cv2
 import numpy as np
 import pandas as pd
@@ -75,7 +76,8 @@ def read_video(file) -> Tuple[cv2.VideoCapture, dict, PIL.Image.Image]:
         first_image = cv2.cvtColor(first_image, cv2.COLOR_BGR2RGB)
         first_image = Image.fromarray(first_image)
 
-        video_params = {"num_frames": int(video.get(cv2.CAP_PROP_FRAME_COUNT)),
+        video_params = {"video_name": file.name,
+                        "num_frames": int(video.get(cv2.CAP_PROP_FRAME_COUNT)),
                         "frame_width": int(video.get(cv2.CAP_PROP_FRAME_WIDTH)),
                         "frame_height": int(video.get(cv2.CAP_PROP_FRAME_HEIGHT)),
                         "frames_per_second": video.get(cv2.CAP_PROP_FPS)}
@@ -118,6 +120,9 @@ def create_video_output_file(frame_rate: float, height: int, width: int) -> Tupl
 
 
 def convert_mp4_standard_format(file_out: tempfile.NamedTemporaryFile):
-    os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f mp4 {file_out.name}_new")
-    video_file = open(f"{file_out.name}_new", "rb")
+    if not os.path.exists('videos'):
+        os.makedirs("videos")
+    os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f mp4 -y videos/generated_video")
+    video_file = open("videos/generated_video", "rb")
+    gc.collect()
     return video_file
