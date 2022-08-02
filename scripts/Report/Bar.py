@@ -23,7 +23,7 @@ class Bar(Dashboard.Item):
         data_dict = df_to_dict(data, col="n_crossing")
 
         with mui.Paper(key=self._key, sx={"display": "flex", "flexDirection": "column", "borderRadius": 3, "overflow": "hidden"}, elevation=1):
-            with self.title_bar(get_table_download_link(data[["segment key", "n_crossing"]])):
+            with self.title_bar(get_table_download_link(data[["segment key", "n_crossing"]]), filename="n_crossing"):
                 mui.icon.BarChart()
                 mui.Typography("Number of segment crossing", sx={"flex": 1})
 

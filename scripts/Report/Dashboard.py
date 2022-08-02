@@ -2,6 +2,7 @@ from uuid import uuid4
 from abc import ABC, abstractmethod
 from streamlit_elements import dashboard, mui
 from contextlib import contextmanager
+from streamlit import session_state
 
 
 class Dashboard:
@@ -30,7 +31,7 @@ class Dashboard:
             self._dark_mode = not self._dark_mode
 
         @contextmanager
-        def title_bar(self, url, padding="5px 15px 5px 15px"):
+        def title_bar(self, url, filename, padding="5px 15px 5px 15px"):
             with mui.Stack(
                 className=self._draggable_class,
                 alignItems="center",
@@ -44,7 +45,8 @@ class Dashboard:
             ):
                 yield
 
-                mui.IconButton(mui.icon.Download, href=url)
+                mui.IconButton(mui.icon.Download,
+                               href=url, download=f"{session_state['video_name'].split('.')[0]}_{filename}.csv")
 
         @abstractmethod
         def __call__(self):
