@@ -26,7 +26,7 @@ def main():
         If you have data that could be helpful, please contact us at raffo.kalandadze@gmail.com""")
 
     # Specify canvas parameters in application
-    drawing_mode = st.sidebar.selectbox("Drawing tool: 🖼", ("rect", "circle"))
+    drawing_mode = st.sidebar.selectbox("Drawing tool: 🖼", ("rect", "circle", "transform"))
 
     # create UI to uploading video
     file = st.sidebar.file_uploader("Upload video: 💾", type=["mp4"])
@@ -40,7 +40,7 @@ def main():
             st.warning(" \t ⚠️ upload video file or use example")
 
         # About
-        st.markdown(read_markdown("docs/about.md"), unsafe_allow_html=True)
+        st.markdown(read_markdown("docs/about.rst"), unsafe_allow_html=True)
 
     file = open("examples/example.mp4", "rb") if example_btn else file
     video, video_params, first_image = read_video(file)
