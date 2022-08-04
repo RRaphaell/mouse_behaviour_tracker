@@ -117,7 +117,7 @@ class Analyzer:
         """count number of crossing in each segment and plot bars"""
 
         self.segments_df['n_crossing'] = self.segments_df.apply(
-            lambda segment: sum(np.diff(self._count_elapsed_n_frames(segment, predictions))), axis=1)
+            lambda segment: int(np.ceil(sum(np.diff(self._count_elapsed_n_frames(segment, predictions))) / 2)), axis=1)
 
         # sum up values for same segments
         self.segments_df["n_crossing"] = self.segments_df.groupby('segment key')["n_crossing"].transform('sum')
