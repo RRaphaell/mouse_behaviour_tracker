@@ -1,10 +1,9 @@
 import cv2
 import numpy as np
 import pandas as pd
-from scripts.Models.Controller.Controller import Controller
 from scripts.config import KEYPOINT, SEGMENTS, CANVAS
 from scripts.utils import calculate_circle_center_cords
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 
 class Tracker:
@@ -26,7 +25,6 @@ class Tracker:
             segment_colors (dict[str, list[float]]): color for each unique segment
         """
 
-        self.controller = Controller()
         self.segments_df = segments_df
         self.segment_colors = segment_colors
 
@@ -58,13 +56,9 @@ class Tracker:
 
         return img
 
-    def draw_predictions(self, frame: np.ndarray) -> np.ndarray:
+    def draw_predictions(self, frame: np.ndarray, coords: List[Tuple[int, int]]) -> np.ndarray:
         """draw all segments and predictions on video stream"""
-        coords = self.controller.predict_img(frame)
         self._draw_keypoints(frame, coords)
         predicted_image = cv2.resize(frame, (CANVAS.width, CANVAS.height), interpolation=cv2.INTER_NEAREST)
         predicted_image = self._draw_segments(predicted_image)
         return predicted_image
-
-    def get_predictions(self):
-        return self.controller.get_predictions()

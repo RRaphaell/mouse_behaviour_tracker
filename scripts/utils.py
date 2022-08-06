@@ -11,6 +11,34 @@ from PIL import Image
 from st_aggrid import AgGrid    # for editable dataframe
 from scripts.config import COLOR_PALETTE
 from typing import Tuple
+from streamlit_elements import elements
+from streamlit import session_state
+
+
+def redraw_after_refresh():
+    st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
+    st.video(session_state.generated_video)
+
+    st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
+    report = session_state.report
+    crossing_df = session_state.crossing_df
+    time_df = session_state.time_df
+    tracked_road = session_state.tracked_road
+    predictions = session_state.predictions
+
+    with elements("demo"):
+        with report.dashboard(rowHeight=57):
+            report.road_passed(pd.DataFrame(predictions, columns=["x", "y"]), tracked_road)
+            report.time_spent(time_df)
+            report.n_crossing(crossing_df)
+
+
+def export_analysis(group_type, series):
+    crossing_df = session_state.crossing_df[["segment key", "n_crossing"]]
+    time_df = session_state.time_df[["segment key", "elapsed_sec%"]]
+    merge_df = pd.merge(crossing_df, time_df, on='segment key')
+    merge_df["group_type"] = group_type
+    merge_df["series"] = series
 
 
 def read_markdown(markdown_file):

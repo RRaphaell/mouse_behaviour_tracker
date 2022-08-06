@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import pandas as pd
+from scripts.Models.Controller.Controller import Controller
 from scripts.Tracker import Tracker
 from scripts.Analyzer import Analyzer
 from scripts.utils import generate_segments_colors, create_video_output_file, convert_mp4_standard_format
@@ -38,6 +39,7 @@ class Pipeline:
             first_image (np.ndarray): first image of the video
         """
 
+        self.controller = Controller()
         segment_colors = generate_segments_colors(segments_df)
         self.num_frames = video_params["num_frames"]
         self.report = SimpleNamespace(
@@ -52,22 +54,9 @@ class Pipeline:
 
         self.tracker = Tracker(segments_df, segment_colors)
         self.file_out, self.out = create_video_output_file(25.0, CANVAS.width, CANVAS.height)
-
         self.analyzer = Analyzer(video_params, segments_df, first_image, segment_colors, self.report)
 
-    def show_report(self) -> None:
-        """this functions calls all functions to show reports"""
-        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
-
-        predictions = np.array(self.tracker.get_predictions())
-
-        with elements("demo"):
-            with self.report.dashboard(rowHeight=57):
-                self.analyzer.draw_tracked_road(predictions)
-                self.analyzer.show_elapsed_time_in_segments(predictions)
-                self.analyzer.show_n_crossing_in_segments(predictions)
-
-    def run(self, video: cv2.VideoCapture) -> None:
+    def run(self, video: cv2.VideoCapture, show_tracked_video: bool, show_report: bool) -> None:
         """this function runs video stream, use tracker to show segments, predictions and also analyzes them"""
 
         curr_frame_idx, progress_bar = 0, st.progress(0)
@@ -79,9 +68,32 @@ class Pipeline:
                 progress_bar.empty()
                 break
 
-            img = self.tracker.draw_predictions(img)
-            self.out.write(img)
+            coords = self.controller.predict_img(img)
 
+            if show_tracked_video:
+                img = self.tracker.draw_predictions(img, coords)
+                self.out.write(img)
+
+        if show_tracked_video:
+            self.generate_tracked_video()
+
+        if show_report:
+            # show tracked road, elapsed time in segments and etc
+            self.show_report()
+
+    def show_report(self) -> None:
+        """this functions calls all functions to show reports"""
+        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
+
+        predictions = np.array(self.controller.get_predictions())
+
+        with elements("demo"):
+            with self.report.dashboard(rowHeight=57):
+                self.analyzer.draw_tracked_road(predictions)
+                self.analyzer.show_elapsed_time_in_segments(predictions)
+                self.analyzer.show_n_crossing_in_segments(predictions)
+
+    def generate_tracked_video(self):
         self.release_videos()
 
         # show annotated video
@@ -89,9 +101,6 @@ class Pipeline:
         video_file = convert_mp4_standard_format(self.file_out)
         st.video(video_file)
         session_state["generated_video"] = video_file
-
-        # show tracked road, elapsed time in segments and etc
-        self.show_report()
 
     def release_videos(self) -> None:
         """call video destructors"""

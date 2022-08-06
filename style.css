@@ -48,15 +48,15 @@
     margin: auto;
 }
 
-.stButton {
-    text-align: center;
-}
+/*.stButton {*/
+/*    text-align: center;*/
+/*}*/
 
-.row-widget.stButton button  {
-    padding: 15px 60px;
-    font-size: 20px;
-    border-radius: 15px;
-}
+/*.row-widget.stButton button  {*/
+/*    padding: 15px 60px;*/
+/*    font-size: 20px;*/
+/*    border-radius: 15px;*/
+/*}*/
 
 .CanvasToolbar_enabled__z-9Es {
     filter: invert(100%);
