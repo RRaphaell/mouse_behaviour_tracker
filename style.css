@@ -22,7 +22,6 @@
     width: 852px;
     display: flex;
     align-items: center;
-    justify-content: center;
     margin: auto;
 }
 
@@ -32,6 +31,23 @@
     justify-content: center;
     align-items: center;
     margin: auto;
+}
+
+[data-testId="stFormSubmitButton"] button {
+    padding: 12px 30px;
+    transition: all 0.3s ease-in;
+    border-radius: 15px;
+    border-color: #990000;
+}
+
+.stDownloadButton button {
+    padding: 10px 25px;
+    border-radius: 15px;
+}
+
+[data-testId="stFormSubmitButton"] button:hover {
+    transform: scale(0.9);
+    border-color: #505158;
 }
 
 .stProgress {
@@ -47,16 +63,6 @@
     text-align: center;
     margin: auto;
 }
-
-/*.stButton {*/
-/*    text-align: center;*/
-/*}*/
-
-/*.row-widget.stButton button  {*/
-/*    padding: 15px 60px;*/
-/*    font-size: 20px;*/
-/*    border-radius: 15px;*/
-/*}*/
 
 .CanvasToolbar_enabled__z-9Es {
     filter: invert(100%);

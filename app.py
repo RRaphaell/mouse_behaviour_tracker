@@ -45,7 +45,7 @@ def user_input_form(file):
                                       value=False,
                                       help="mark if you want to see the analysis report")
 
-        start_btn = st.form_submit_button(label="Start")
+        start_btn = st.form_submit_button(label="▶ Start")
 
     return example_btn, show_tracked_video_btn, show_report_btn, start_btn
 
@@ -59,7 +59,7 @@ def export_form():
 
         # As the download button needs the df at the beginning, we use this trick to set the analysis after generating
         export_btn_placeholder = st.empty()
-        export_analysis_btn = export_btn_placeholder.download_button(label="export",
+        export_analysis_btn = export_btn_placeholder.download_button(label="📩 export",
                                                                      data=analysis_df,
                                                                      file_name='analysis.csv',
                                                                      mime='text/csv')
