@@ -8,37 +8,58 @@ from pathlib import Path
 import streamlit as st
 import PIL
 from PIL import Image
-from st_aggrid import AgGrid    # for editable dataframe
+from st_aggrid import AgGrid  # for editable dataframe
 from scripts.config import COLOR_PALETTE
 from typing import Tuple
 from streamlit_elements import elements
 from streamlit import session_state
 
 
-def redraw_after_refresh():
-    st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
-    st.video(session_state.generated_video)
+def redraw_after_refresh(show_tracked_video_btn, show_report_btn):
+    if show_tracked_video_btn:
+        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Video streaming</h3>", unsafe_allow_html=True)
+        st.video(session_state.generated_video)
 
-    st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
-    report = session_state.report
-    crossing_df = session_state.crossing_df
-    time_df = session_state.time_df
-    tracked_road = session_state.tracked_road
-    predictions = session_state.predictions
+    if show_report_btn:
+        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
+        report = session_state.report
+        crossing_df = session_state.crossing_df
+        time_df = session_state.time_df
+        tracked_road = session_state.tracked_road
+        predictions = session_state.predictions
 
-    with elements("demo"):
-        with report.dashboard(rowHeight=57):
-            report.road_passed(pd.DataFrame(predictions, columns=["x", "y"]), tracked_road)
-            report.time_spent(time_df)
-            report.n_crossing(crossing_df)
+        with elements("demo"):
+            with report.dashboard(rowHeight=57):
+                report.road_passed(pd.DataFrame(predictions, columns=["x", "y"]), tracked_road)
+                report.time_spent(time_df)
+                report.n_crossing(crossing_df)
 
 
-def export_analysis(group_type, series):
+@st.cache
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv().encode('utf-8')
+
+
+def get_analysis_df(group_type, series):
     crossing_df = session_state.crossing_df[["segment key", "n_crossing"]]
-    time_df = session_state.time_df[["segment key", "elapsed_sec%"]]
+    time_df = session_state.time_df[["segment key", "elapsed_sec%", "elapsed_sec"]]
     merge_df = pd.merge(crossing_df, time_df, on='segment key')
     merge_df["group_type"] = group_type
     merge_df["series"] = series
+
+    return convert_df(merge_df)
+
+
+def redraw_export_btn(placeholder, group_type_text, series_text):
+    df = get_analysis_df(group_type_text, series_text)
+
+    # clear and redraw download button with new generated data
+    placeholder.empty()
+    export_analysis_btn = placeholder.download_button(label="export",
+                                                      data=df,
+                                                      file_name=f'{session_state["video_name"]}_analysis.csv',
+                                                      mime='text/csv')
 
 
 def read_markdown(markdown_file):
@@ -140,7 +161,9 @@ def generate_segments_colors(segments_df: pd.DataFrame) -> dict:
     return segment_colors
 
 
-def create_video_output_file(frame_rate: float, height: int, width: int) -> Tuple[tempfile.NamedTemporaryFile, cv2.VideoWriter]:
+def create_video_output_file(frame_rate: float,
+                             height: int,
+                             width: int) -> Tuple[tempfile.NamedTemporaryFile, cv2.VideoWriter]:
     file_out = tempfile.NamedTemporaryFile(suffix='.mp4')
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(file_out.name, fourcc, frame_rate, (height, width))
@@ -150,6 +173,7 @@ def create_video_output_file(frame_rate: float, height: int, width: int) -> Tupl
 def convert_mp4_standard_format(file_out: tempfile.NamedTemporaryFile):
     if not os.path.exists('videos'):
         os.makedirs("videos")
+
     os.system(f"ffmpeg -i {file_out.name} -c:v libx264 -c:a copy -f mp4 -y videos/generated_video")
     video_file = open("videos/generated_video", "rb")
     gc.collect()

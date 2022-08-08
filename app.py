@@ -1,9 +1,11 @@
 import gc
+import pandas as pd
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from scripts.Pipeline import Pipeline
 from scripts.config import CANVAS
-from scripts.utils import show_canvas_info, read_video, read_markdown, redraw_after_refresh, export_analysis
+from scripts.utils import show_canvas_info, read_video, read_markdown, \
+    redraw_after_refresh, convert_df, redraw_export_btn
 from streamlit import session_state
 
 
@@ -49,16 +51,24 @@ def user_input_form(file):
 
 
 def export_form():
-    with st.sidebar.form(key="Export analysis"):
+    analysis_df = convert_df(pd.DataFrame())
+
+    with st.sidebar:
         group_type_text = st.text_input("Group type", help="The name of the group that participated in the test")
         series_text = st.text_input("Series", help="What session is the experiment in?")
-        export_analysis_btn = st.form_submit_button(label="export")
+
+        # As the download button needs the df at the beginning, we use this trick to set the analysis after generating
+        export_btn_placeholder = st.empty()
+        export_analysis_btn = export_btn_placeholder.download_button(label="export",
+                                                                     data=analysis_df,
+                                                                     file_name='analysis.csv',
+                                                                     mime='text/csv')
 
     with st.sidebar:
         # About
         st.markdown(read_markdown("docs/about.rst"), unsafe_allow_html=True)
 
-    return group_type_text, series_text, export_analysis_btn
+    return group_type_text, series_text, export_analysis_btn, analysis_df, export_btn_placeholder
 
 
 def main():
@@ -70,7 +80,7 @@ def main():
     # create UI to uploading video
     file = st.sidebar.file_uploader("Upload video: 💾", type=["mp4"])
     example_btn, show_tracked_video_btn, show_report_btn, start_btn = user_input_form(file)
-    group_type_text, series_text, export_analysis_btn = export_form()
+    group_type_text, series_text, export_analysis_btn, analysis_df, export_btn_placeholder = export_form()
 
     # ********************************** mainbar **********************************
 
@@ -98,16 +108,16 @@ def main():
         elif objects.empty:
             st.warning("add at least one segment on canvas")  # if the user did not add the segment at all
         else:
-            pipeline = Pipeline(video_params, objects, first_image)
-            pipeline.run(video, show_tracked_video_btn, show_report_btn)
+            pipeline = Pipeline(video_params, objects, first_image, show_tracked_video_btn, show_report_btn, analysis_df)
+            pipeline.run(video)
+
+            redraw_export_btn(export_btn_placeholder, group_type_text, series_text)
             gc.collect()
 
-    # redraw report and videos if app refreshed
+    # redraw widgets if app refreshed
     elif "report" in session_state:
-        redraw_after_refresh()
-
-    if export_analysis_btn:
-        export_analysis(group_type_text, series_text)
+        redraw_after_refresh(show_tracked_video_btn, show_report_btn)
+        redraw_export_btn(export_btn_placeholder, group_type_text, series_text)
 
 
 if __name__ == "__main__":

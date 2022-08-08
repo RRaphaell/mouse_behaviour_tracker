@@ -23,7 +23,7 @@ class Pie(Dashboard.Item):
         data_dict = df_to_dict(data, col="elapsed_sec%")
 
         with mui.Paper(key=self._key, sx={"display": "flex", "flexDirection": "column", "borderRadius": 3, "overflow": "hidden"}, elevation=1):
-            with self.title_bar(get_table_download_link(data[["segment key", "elapsed_sec%"]]), filename="elapsed_sec%"):
+            with self.title_bar(get_table_download_link(data[["segment key", "elapsed_sec%", "elapsed_sec"]]), filename="elapsed_sec"):
                 mui.icon.PieChart()
                 mui.Typography("Time spent in the segment", sx={"flex": 1})
 

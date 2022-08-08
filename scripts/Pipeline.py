@@ -29,6 +29,9 @@ class Pipeline:
                  video_params: dict,
                  segments_df: pd.DataFrame,
                  first_image: np.ndarray,
+                 show_tracked_video: bool,
+                 show_report: bool,
+                 analysis_df: pd.DataFrame
                  ):
         """
         Initialize pipeline from video and segments information
@@ -40,6 +43,9 @@ class Pipeline:
         """
 
         self.controller = Controller()
+        self.analysis_df = analysis_df
+        self.show_tracked_video = show_tracked_video
+        self.show_report = show_report
         segment_colors = generate_segments_colors(segments_df)
         self.num_frames = video_params["num_frames"]
         self.report = SimpleNamespace(
@@ -54,9 +60,9 @@ class Pipeline:
 
         self.tracker = Tracker(segments_df, segment_colors)
         self.file_out, self.out = create_video_output_file(25.0, CANVAS.width, CANVAS.height)
-        self.analyzer = Analyzer(video_params, segments_df, first_image, segment_colors, self.report)
+        self.analyzer = Analyzer(video_params, segments_df, first_image, segment_colors, self.report, self.show_report)
 
-    def run(self, video: cv2.VideoCapture, show_tracked_video: bool, show_report: bool) -> None:
+    def run(self, video: cv2.VideoCapture) -> None:
         """this function runs video stream, use tracker to show segments, predictions and also analyzes them"""
 
         curr_frame_idx, progress_bar = 0, st.progress(0)
@@ -70,20 +76,19 @@ class Pipeline:
 
             coords = self.controller.predict_img(img)
 
-            if show_tracked_video:
+            if self.show_tracked_video:
                 img = self.tracker.draw_predictions(img, coords)
                 self.out.write(img)
 
-        if show_tracked_video:
+        if self.show_tracked_video:
             self.generate_tracked_video()
 
-        if show_report:
-            # show tracked road, elapsed time in segments and etc
-            self.show_report()
+        # show tracked road, elapsed time in segments and etc
+        self.analyse()
 
-    def show_report(self) -> None:
+    def analyse(self) -> None:
         """this functions calls all functions to show reports"""
-        st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
+        # st.markdown("<h3 style='text-align: center; color: #FF8000;'>Behavior report</h3>", unsafe_allow_html=True)
 
         predictions = np.array(self.controller.get_predictions())
 

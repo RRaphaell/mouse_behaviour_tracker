@@ -7,13 +7,13 @@
     justify-content: center;
     align-items: center;
 }
-[data-testId="stVerticalBlock"] div:nth-of-type(3)  {
+[data-testId="stVerticalBlock"] div:nth-of-type(4)  {
     -ms-overflow-style: none;
     overflow-y: hidden; /* Hide vertical scrollbar */
     overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
-[data-testId="stVerticalBlock"] div:nth-of-type(3) iframe {
+[data-testId="stVerticalBlock"] div:nth-of-type(4) iframe {
     margin-left: 50%;
     transform: translateX(-426px);
 }

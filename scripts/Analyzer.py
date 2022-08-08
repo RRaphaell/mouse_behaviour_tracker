@@ -35,7 +35,8 @@ class Analyzer:
                  segments_df: pd.DataFrame,
                  first_image: np.ndarray,
                  segment_colors: Dict[str, List[float]],
-                 report: SimpleNamespace
+                 report: SimpleNamespace,
+                 show_report: bool
                  ):
         """
         initialize analyzer class with streamlit widgets and markdowns
@@ -56,6 +57,7 @@ class Analyzer:
         self.frames_per_second = video_params["frames_per_second"]
         self.segment_colors = segment_colors
         self.report = report
+        self.show_report = show_report
 
     def draw_tracked_road(self, predictions: np.ndarray) -> None:
         """Draw the entire route covered by the mouse"""
@@ -67,7 +69,9 @@ class Analyzer:
 
         session_state["tracked_road"] = self.first_image
         session_state["predictions"] = predictions
-        self.report.road_passed(pd.DataFrame(predictions, columns=["x", "y"]), self.first_image)
+
+        if self.show_report:
+            self.report.road_passed(pd.DataFrame(predictions, columns=["x", "y"]), self.first_image)
 
     def _count_elapsed_n_frames(self, segment: pd.Series, predictions: np.ndarray) -> Iterable:
         """count quantity of frames when mouse is in segment"""
@@ -111,7 +115,9 @@ class Analyzer:
         df = df.append({'segment key': "Other", 'elapsed_sec%': 100-df["elapsed_sec%"].sum()}, ignore_index=True)
 
         session_state["time_df"] = df
-        self.report.time_spent(df)
+
+        if self.show_report:
+            self.report.time_spent(df)
 
     def show_n_crossing_in_segments(self, predictions: np.ndarray) -> None:
         """count number of crossing in each segment and plot bars"""
@@ -124,4 +130,6 @@ class Analyzer:
         df = self.segments_df.drop_duplicates(subset=['segment key', 'n_crossing'])
 
         session_state["crossing_df"] = df
-        self.report.n_crossing(df)
+
+        if self.show_report:
+            self.report.n_crossing(df)
