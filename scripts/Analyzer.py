@@ -79,17 +79,31 @@ class Analyzer:
         x, y = predictions[:, 0], predictions[:, 1]
         x = x * CANVAS.width / self.frame_width
         y = y * CANVAS.height / self.frame_height
-        
+
         if segment["type"] == "rect":
+            angle = segment["angle"]
             x1, y1 = segment["left"], segment["top"]
-            x2, y2 = segment["left"]+segment["width"], segment["top"]+segment["height"]
-            is_in_segment = (x > x1) & (x < x2) & (y > y1) & (y < y2)
+            x2, y2 = segment["left"]+segment["width"]*segment["scaleX"], \
+                     segment["top"]+segment["height"]*segment["scaleY"]
+            x1, y1 = self.calculate_rotated_points(x1, y1, angle)
+            x2, y2 = self.calculate_rotated_points(x2, y2, angle)
+
+            if angle == 0:
+                is_in_segment = (x > x1) & (x < x2) & (y > y1) & (y < y2)
+            else:
+                answers = []
+                for i in range(len(x)):
+                    x_ = x[i]
+                    y_ = y[i]
+                    x_, y_ = self.calculate_rotated_points(x_, y_, angle)
+                    is_in_segment = (x_ > x1) & (x_ < x2) & (y_ > y1) & (y_ < y2)
+                    answers.append(is_in_segment)
+                return np.array(answers)
         else:
             circle_x, circle_y = calculate_circle_center_cords(segment)
             rad = segment["radius"]
             # Compare radius of circle with distance of its center from given point
             is_in_segment = (x - circle_x) ** 2 + (y - circle_y) ** 2 <= rad ** 2
-
         return is_in_segment
 
     def _count_elapsed_time_in_segments(self, predictions: np.ndarray) -> None:
@@ -133,3 +147,11 @@ class Analyzer:
 
         if self.show_report:
             self.report.n_crossing(df)
+
+    @staticmethod
+    def calculate_rotated_points(x1, y1, angle):
+        angle = 360-angle
+        x1 = x1 * np.cos(np.radians(angle)) - y1 * np.sin(np.radians(angle))
+        y1 = x1 * np.sin(np.radians(angle)) + y1 * np.cos(np.radians(angle))
+        return x1, y1
+
