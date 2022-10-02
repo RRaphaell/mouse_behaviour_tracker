@@ -55,11 +55,11 @@ class Pipeline:
             road_passed=Card(3, 8, 6, 14, minW=2, minH=4)
         )
 
-        session_state["report"] = self.report
         session_state["video_name"] = video_params["video_name"]
 
-        self.tracker = Tracker(segments_df, segment_colors)
-        self.file_out, self.out = create_video_output_file(25.0, CANVAS.width, CANVAS.height)
+        if self.show_tracked_video:
+            self.tracker = Tracker(segments_df, segment_colors)
+            self.file_out, self.out = create_video_output_file(25.0, CANVAS.width, CANVAS.height)
         self.analyzer = Analyzer(video_params, segments_df, first_image, segment_colors, self.report, self.show_report)
 
     def run(self, video: cv2.VideoCapture) -> None:
@@ -97,6 +97,8 @@ class Pipeline:
                 self.analyzer.draw_tracked_road(predictions)
                 self.analyzer.show_elapsed_time_in_segments(predictions)
                 self.analyzer.show_n_crossing_in_segments(predictions)
+
+        session_state["report"] = self.report
 
     def generate_tracked_video(self):
         self.release_videos()

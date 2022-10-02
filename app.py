@@ -1,4 +1,5 @@
 import gc
+import cv2
 import pandas as pd
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
@@ -7,6 +8,7 @@ from scripts.config import CANVAS
 from scripts.utils import show_canvas_info, read_video, read_markdown, \
     redraw_after_refresh, convert_df, redraw_export_btn
 from streamlit import session_state
+gc.enable()
 
 
 def set_page_config():
@@ -101,6 +103,7 @@ def main():
 
     # show table of segments information
     objects = show_canvas_info(canvas_result)
+    pipeline = None
 
     if start_btn:
         if not file and not example_btn:
@@ -110,14 +113,23 @@ def main():
         else:
             pipeline = Pipeline(video_params, objects, first_image, show_tracked_video_btn, show_report_btn, analysis_df)
             pipeline.run(video)
-
             redraw_export_btn(export_btn_placeholder, group_type_text, series_text)
-            gc.collect()
 
     # redraw widgets if app refreshed
     elif "report" in session_state:
         redraw_after_refresh(show_tracked_video_btn, show_report_btn)
         redraw_export_btn(export_btn_placeholder, group_type_text, series_text)
+
+    if video:
+        video.release()
+        cv2.destroyAllWindows()
+        file.close()
+        del video_params
+        del first_image
+
+    if pipeline:
+        del pipeline
+    gc.collect()
 
 
 if __name__ == "__main__":

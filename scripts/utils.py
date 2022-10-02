@@ -35,7 +35,7 @@ def redraw_after_refresh(show_tracked_video_btn, show_report_btn):
                 report.n_crossing(crossing_df)
 
 
-@st.cache
+# @st.cache
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv().encode('utf-8')
