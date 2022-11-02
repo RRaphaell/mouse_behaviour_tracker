@@ -4,6 +4,7 @@ import pandas as pd
 from scripts.config import KEYPOINT, SEGMENTS, CANVAS
 from scripts.utils import calculate_circle_center_cords
 from typing import Dict, List, Tuple
+from PIL import Image, ImageDraw
 
 
 class Tracker:
@@ -36,25 +37,28 @@ class Tracker:
     def _draw_segments(self, img: np.ndarray) -> np.ndarray:
         """Draw all segments on the video stream that were drawn on the canvas"""
 
-        overlay = img.copy()
+        img = Image.fromarray(img)
+        draw = ImageDraw.Draw(img, "RGBA")
+
         for index, segment in self.segments_df.iterrows():
             color = tuple(self.segment_colors[segment["segment key"]])  # color for each segment
             color = list(map(int, color))
             if segment["type"] == "rect":
-                cv2.rectangle(overlay,
-                              (int(segment["left"]), int(segment["top"])),
-                              (int(segment["left"] + segment["width"]), int(segment["top"] + segment["height"])),
-                              color=color[:-1], thickness=-1)
-
-                img = cv2.addWeighted(overlay, SEGMENTS.alpha, img, 1-SEGMENTS.alpha, 1.0)
+                draw.polygon([(int(segment["x1"]), int(segment["y1"])),
+                              (int(segment["x2"]), int(segment["y2"])),
+                              (int(segment["x3"]), int(segment["y3"])),
+                              (int(segment["x4"]), int(segment["y4"]))],
+                             fill=tuple(color[:-1])+(125,))
             else:
                 center_x, center_y = calculate_circle_center_cords(segment)
-                cv2.circle(overlay,
-                           (int(center_x), int(center_y)),
-                           int(segment["radius"]), color=color[:-1], thickness=-1)
-                img = cv2.addWeighted(overlay, SEGMENTS.alpha, img, 1-SEGMENTS.alpha, 1.0)
 
-        return img
+                draw.ellipse((int(center_x - segment["radius"] * segment["scaleX"]),
+                              int(center_y - segment["radius"] * segment["scaleY"]),
+                              int(center_x + segment["radius"] * segment["scaleX"]),
+                              int(center_y + segment["radius"] * segment["scaleY"])),
+                             fill=tuple(color[:-1])+(125,))
+
+        return np.array(img)
 
     def draw_predictions(self, frame: np.ndarray, coords: List[Tuple[int, int]]) -> np.ndarray:
         """draw all segments and predictions on video stream"""

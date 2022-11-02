@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scripts.config import CANVAS
-from scripts.utils import calculate_circle_center_cords
+from scripts.utils import calculate_circle_center_cords, is_in_rect
 from types import SimpleNamespace
 from typing import Dict, List, Iterable
 from streamlit import session_state
@@ -81,12 +81,10 @@ class Analyzer:
         y = y * CANVAS.height / self.frame_height
 
         if segment["type"] == "rect":
-            x1, y1 = segment["left"], segment["top"]
-            x2, y2 = segment["left"]+segment["width"], segment["top"]+segment["height"]
-            is_in_segment = (x > x1) & (x < x2) & (y > y1) & (y < y2)
+            is_in_segment = is_in_rect(x, y, segment)
         else:
             circle_x, circle_y = calculate_circle_center_cords(segment)
-            rad = segment["radius"]
+            rad = segment["radius"] * segment["scaleX"]
             # Compare radius of circle with distance of its center from given point
             is_in_segment = (x - circle_x) ** 2 + (y - circle_y) ** 2 <= rad ** 2
 

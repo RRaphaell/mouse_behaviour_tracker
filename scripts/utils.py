@@ -66,6 +66,48 @@ def read_markdown(markdown_file):
     return Path(markdown_file).read_text()
 
 
+def get_rect_all_coords(x1, y1, width, height, scale_x, scale_y):
+    width, height = width * scale_x, height * scale_y
+    p1 = np.array([x1, y1])
+    p2 = np.array([x1 + width, y1])
+    p3 = np.array([x1 + width, y1 + height])
+    p4 = np.array([x1, y1 + height])
+    return p1, p2, p3, p4
+
+
+# https://www.geeksforgeeks.org/check-whether-given-point-lies-inside-rectangle-not/
+def get_rect_coords_after_rotation(x1, y1, width, height, scale_x, scale_y, angle):
+    p1, p2, p3, p4 = get_rect_all_coords(x1, y1, width, height, scale_x, scale_y)
+    # center = np.array([x1 + width / 2, y1 + height / 2])
+    center = p1
+    angle = angle  # formula works for counter-clockwise
+    R = np.array([[np.cos(np.deg2rad(angle)), -1*np.sin(np.deg2rad(angle))],
+                  [np.sin(np.deg2rad(angle)), np.cos(np.deg2rad(angle))]])
+
+    p1 = center + np.matmul(R, (p1 - center))
+    p2 = center + np.matmul(R, (p2 - center))
+    p3 = center + np.matmul(R, (p3 - center))
+    p4 = center + np.matmul(R, (p4 - center))
+    return p1, p2, p3, p4
+
+
+# TODO: object dataframeshi bevri obieqti sheidzleba iyos amito eg gavasworo
+def add_df_rect_coords(objects):
+    objects[["x1", "y1", "x2", "y2", "x3", "y3", "x4", "y4"]] = 0
+
+    for index, row in objects.iterrows():
+        if row["type"] == "rect":
+            p1, p2, p3, p4 = get_rect_coords_after_rotation(float(row["left"]), float(row["top"]),
+                                                            float(row["width"]), float(row["height"]),
+                                                            float(row["scaleX"]), float(row["scaleY"]),
+                                                            float(row["angle"]))
+
+            objects.at[index, "x1"], objects.at[index, "y1"] = p1
+            objects.at[index, "x2"], objects.at[index, "y2"] = p2
+            objects.at[index, "x3"], objects.at[index, "y3"] = p3
+            objects.at[index, "x4"], objects.at[index, "y4"] = p4
+
+
 def show_canvas_info(canvas_result) -> pd.DataFrame:
     """
     creates dataframe object from segments drawn on the canvas.
@@ -90,9 +132,10 @@ def show_canvas_info(canvas_result) -> pd.DataFrame:
             else:
                 # add segment key column which would be weights of each segment
                 objects.insert(loc=0, column='segment key', value=range(len(objects)))
+                add_df_rect_coords(objects)
 
                 # change dataframe configuration as editable only "segment key" column
-                visible_columns = ["type", "left", "top", "width", "height", "scaleX", "scaleY", "angle"]
+                visible_columns = ["type", "left", "top", "width", "height", "scaleX", "scaleY", "angle", "radius"]
                 grid_options = {"columnDefs": [{"field": "segment key", "editable": True}]}
                 grid_options["columnDefs"] += [{"field": c, "editable": False} for c in visible_columns]
 
@@ -134,10 +177,39 @@ def read_video(file) -> Tuple[cv2.VideoCapture, dict, PIL.Image.Image]:
     return video, video_params, first_image
 
 
+def triangle_area(x1, y1, x2, y2, x3, y3):
+    return abs((x1 * (y2 - y3) +
+                x2 * (y3 - y1) +
+                x3 * (y1 - y2)) / 2.0)
+
+
+# https://math.stackexchange.com/questions/4240275/calculating-xy-coordinates-of-a-rectangle-that-is-rotated-with-a-given-rotation
+# A function to check whether point P(x, y) lies inside the rectangle
+# formed by A(x1, y1), B(x2, y2), C(x3, y3) and D(x4, y4)
+def is_in_rect(pred_x, pred_y, segment):
+    x1, y1 = segment["x1"], segment["y1"]
+    x2, y2 = segment["x2"], segment["y2"]
+    x3, y3 = segment["x3"], segment["y3"]
+    x4, y4 = segment["x4"], segment["y4"]
+
+    # Calculate area of rectangle ABCD
+    A = (triangle_area(x1, y1, x2, y2, x3, y3) +
+         triangle_area(x1, y1, x4, y4, x3, y3))
+
+    A1 = triangle_area(pred_x, pred_y, x1, y1, x2, y2)  # area of PAB
+    A2 = triangle_area(pred_x, pred_y, x2, y2, x3, y3)  # area of PBC
+    A3 = triangle_area(pred_x, pred_y, x3, y3, x4, y4)  # area of PCD
+    A4 = triangle_area(pred_x, pred_y, x1, y1, x4, y4)  # area of PAD
+
+    # Check if sum of A1, A2, A3 and A4 is same as A
+    # print(A, A1 + A2 + A3 + A4, A-(A1 + A2 + A3 + A4))
+    return abs(A - (A1 + A2 + A3 + A4)) < 0.000001
+
+
 def calculate_circle_center_cords(segment: pd.Series) -> Tuple[int, int]:
     """calculate circle center based on radius, angle and corner coordinates using pythagorean theorem"""
-    center_x = segment["left"] + segment["radius"] * np.cos(np.deg2rad(segment["angle"]))
-    center_y = segment["top"] + segment["radius"] * np.sin(np.deg2rad(segment["angle"]))
+    center_x = segment["left"] + segment["radius"] * segment["scaleX"] * np.cos(np.deg2rad(segment["angle"]))
+    center_y = segment["top"] + segment["radius"] * segment["scaleY"] * np.sin(np.deg2rad(segment["angle"]))
     return center_x, center_y
 
 
