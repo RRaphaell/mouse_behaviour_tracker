@@ -13,25 +13,25 @@
     overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
-[data-testId="stVerticalBlock"] div:nth-of-type(4) iframe {
+[data-testId="stVerticalBlock"] div:nth-of-type(3) iframe {
     margin-left: 50%;
     transform: translateX(-426px);
 }
 
-[data-testId="stVerticalBlock"] div:nth-of-type(7) {
+[data-testId="stVerticalBlock"] div:nth-of-type(9) {
     width: 852px;
     display: flex;
     align-items: center;
     margin: auto;
 }
 
-[data-testId="stVerticalBlock"] div:nth-of-type(10) {
-    width: 852px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: auto;
-}
+/*[data-testId="stVerticalBlock"] div:nth-of-type(10) {*/
+/*    width: 852px;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    margin: auto;*/
+/*}*/
 
 [data-testId="stFormSubmitButton"] button {
     padding: 12px 30px;
