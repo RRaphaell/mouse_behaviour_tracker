@@ -18,6 +18,13 @@
     transform: translateX(-426px);
 }
 
+[data-testId="stVerticalBlock"] div:nth-of-type(6) {
+    width: 852px;
+    display: flex;
+    align-items: center;
+    margin: auto;
+}
+
 [data-testId="stVerticalBlock"] div:nth-of-type(9) {
     width: 852px;
     display: flex;
