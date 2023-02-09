@@ -3,7 +3,7 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white) 
 ![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://rraphaell-mouse-behaviour-tracker-app-so205q.streamlitapp.com/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mouse-behaviour-tracker.streamlit.app/)
 
 ## **Overview**
 
@@ -17,7 +17,7 @@ https://user-images.githubusercontent.com/74569835/179845647-7773e224-a42a-4deb-
 
 
 ## **How to use**
-you can just open the [website](https://rraphaell-mouse-behaviour-tracker-app-so205q.streamlitapp.com/) and upload the video you want to track, or use our example if you just want to see how it works.<br>
+you can just open the [website](https://mouse-behaviour-tracker.streamlit.app/) and upload the video you want to track, or use our example if you just want to see how it works.<br>
 Draw all segments on the canvas and click the start button to generate the report.<br>
 Based on the length of the video, it may take several minutes
 
