@@ -110,7 +110,8 @@ class Analyzer:
         # sum up values for same segments
         self.segments_df["elapsed_sec%"] = self.segments_df.groupby('segment key')["elapsed_sec%"].transform('sum')
         df = self.segments_df.drop_duplicates(subset=['segment key', 'elapsed_sec%'])
-        df = df.append({'segment key': "Other", 'elapsed_sec%': 100-df["elapsed_sec%"].sum()}, ignore_index=True)
+        df.loc[len(df)] = {"segment key": "Other", "elapsed_sec%": 100 - df["elapsed_sec%"].sum()}
+        # df = df.append({'segment key': "Other", 'elapsed_sec%': 100-df["elapsed_sec%"].sum()}, ignore_index=True)
 
         session_state["time_df"] = df
 
