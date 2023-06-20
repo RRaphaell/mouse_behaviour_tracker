@@ -5,7 +5,7 @@ opencv-python==4.6.0.66
 opencv-python-headless==4.6.0.66
 pandas==1.4.3
 segmentation-models-pytorch==0.2.1
-streamlit==1.11.0
+streamlit==1.23.1
 streamlit-aggrid==0.2.3.post2
 streamlit-drawable-canvas==0.8.0
 streamlit-elements==0.1.0
