@@ -62,7 +62,7 @@ class Pipeline:
             self.file_out, self.out = create_video_output_file(25.0, CANVAS.width, CANVAS.height)
         self.analyzer = Analyzer(video_params, segments_df, first_image, segment_colors, self.report, self.show_report)
 
-    def run(self, video: cv2.VideoCapture) -> None:
+    def run(self, video: cv2.VideoCapture, body_part_idx: int) -> None:
         """this function runs video stream, use tracker to show segments, predictions and also analyzes them"""
 
         curr_frame_idx, progress_bar = 0, st.progress(0)
@@ -74,10 +74,10 @@ class Pipeline:
                 progress_bar.empty()
                 break
 
-            coords = self.controller.predict_img(img)
+            coords, target_coord = self.controller.predict_img(img, body_part_idx)
 
             if self.show_tracked_video:
-                img = self.tracker.draw_predictions(img, coords)
+                img = self.tracker.draw_predictions(img, coords, target_coord)
                 self.out.write(img)
 
         if self.show_tracked_video:

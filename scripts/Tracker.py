@@ -29,10 +29,13 @@ class Tracker:
         self.segments_df = segments_df
         self.segment_colors = segment_colors
 
-    def _draw_keypoints(self, frame: np.ndarray, coords: list) -> None:
+    def _draw_keypoints(self, frame: np.ndarray, coords: list, target_coord: tuple) -> None:
         """draw model prediction keypoint"""
         for c in coords:
             frame = cv2.circle(frame, c, KEYPOINT.radius, KEYPOINT.fill, -1)
+
+        if target_coord:
+            frame = cv2.circle(frame, target_coord, KEYPOINT.radius, KEYPOINT.target_fill, -1)
 
     def _draw_segments(self, img: np.ndarray) -> np.ndarray:
         """Draw all segments on the video stream that were drawn on the canvas"""
@@ -60,9 +63,9 @@ class Tracker:
 
         return np.array(img)
 
-    def draw_predictions(self, frame: np.ndarray, coords: List[Tuple[int, int]]) -> np.ndarray:
+    def draw_predictions(self, frame: np.ndarray, coords: List[Tuple[int, int]], target_coord: Tuple[int, int]) -> np.ndarray:
         """draw all segments and predictions on video stream"""
-        self._draw_keypoints(frame, coords)
+        self._draw_keypoints(frame, coords, target_coord)
         predicted_image = cv2.resize(frame, (CANVAS.width, CANVAS.height), interpolation=cv2.INTER_NEAREST)
         predicted_image = self._draw_segments(predicted_image)
         return predicted_image

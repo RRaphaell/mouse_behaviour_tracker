@@ -32,6 +32,35 @@
     margin: auto;
 }
 
+[data-testId="stVerticalBlock"] div:nth-of-type(1).element-container.css-1p1nwyz.e1tzin5v3 {
+    height: 67px;
+}
+[data-testId="stVerticalBlock"].css-1pd56a0.e1tzin5v0 {
+    margin-top: -50px;
+}
+
+#root > div.nth:only-of-type(1) {
+    height: 250px !important;
+}
+
+[data-testId="stVerticalBlock"] div:nth-of-type(1).element-container.css-1p1nwyz.e1tzin5v3 iframe {
+    margin-top: -75px;
+
+    width: 250px;
+    height: 250px;
+
+    margin-left: 20px;
+}
+
+/*[data-testId="stVerticalBlock"] div .css-1p1nwyz e1tzin5v3  {*/
+/*    background: red;*/
+/*}*/
+
+/*[data-testId="stVerticalBlock"] div.css-1pd56a0 e1tzin5v0{*/
+/*    margin-top: -50px;*/
+/*}*/
+
+
 /*[data-testId="stVerticalBlock"] div:nth-of-type(10) {*/
 /*    width: 852px;*/
 /*    display: flex;*/
