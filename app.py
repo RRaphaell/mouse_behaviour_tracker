@@ -24,8 +24,6 @@ def set_page_config():
 
 def info():
     with st.sidebar:
-        st_lottie("https://assets4.lottiefiles.com/packages/lf20_Qi6u1JDCoL.json")
-
         st.info("""The project is in progress, we trained the model with a few images of rats,
         so it would be inaccurate frequently, but we update it periodically.
         If you have data that could be helpful, please contact us at raffo.kalandadze@gmail.com""")
@@ -81,6 +79,11 @@ def export_form():
     with st.sidebar:
         # About
         st.markdown(read_markdown("docs/about.rst"), unsafe_allow_html=True)
+
+        st_lottie("https://assets4.lottiefiles.com/packages/lf20_Qi6u1JDCoL.json",
+                  height=200,
+                  width=200,
+                  key="mouse_animation")
 
     return group_type_text, series_text, export_analysis_btn, analysis_df, export_btn_placeholder
 
