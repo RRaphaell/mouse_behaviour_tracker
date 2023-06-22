@@ -19,6 +19,7 @@ class SEGMENTS:
 class KEYPOINT:
     radius = 7
     fill = (0, 0, 255)
+    target_fill = (255, 0, 0)
 
 
 class CANVAS:
