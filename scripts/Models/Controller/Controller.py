@@ -80,7 +80,7 @@ class Controller:
             pred = (torch.nn.Sigmoid()(pred) > 0.5).double()
         return pred.cpu().detach()
 
-    def predict_img(self, orig_img: np.ndarray) -> List[Tuple[int, int]]:
+    def predict_img(self, orig_img: np.ndarray, body_part_idx: int) -> List[Tuple[int, int]]:
         """run both model. first to find centroid then crop image and run second model
         to predict body parts and return predicted coordinates"""
 
@@ -100,12 +100,13 @@ class Controller:
         del coords[1]   # remove center
         # rescale coords to orig image
         coords = [(int(c[1]*(CENTER_CFG.cropping_size[1]/CENTER_CFG.img_size[1]) + crop_from_x - (CENTER_CFG.cropping_size[1] - cropped_img_size[1])),
-                   int(c[0]*(CENTER_CFG.cropping_size[0]/CENTER_CFG.img_size[0]) + crop_from_y - (CENTER_CFG.cropping_size[0] - cropped_img_size[0]))) for c in coords if not torch.all(c.eq(torch.tensor([0,0])))]
+                   int(c[0]*(CENTER_CFG.cropping_size[0]/CENTER_CFG.img_size[0]) + crop_from_y - (CENTER_CFG.cropping_size[0] - cropped_img_size[0]))) if not torch.all(c.eq(torch.tensor([0,0]))) else None for c in coords]
 
-        if len(coords):
-            self.predictions.append(coords[0])
+        target_coord = coords[body_part_idx] if len(coords) and coords[body_part_idx] is not None else None
+        if target_coord:
+            self.predictions.append(target_coord)
 
-        return coords
+        return coords, target_coord
 
     def get_predictions(self):
         return self.predictions

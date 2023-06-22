@@ -1,12 +1,4 @@
-.css-1v0mbdj {
-    margin: auto;
-}
 
-.css-rncmk8 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 [data-testId="stVerticalBlock"] div:nth-of-type(4)  {
     -ms-overflow-style: none;
     overflow-y: hidden; /* Hide vertical scrollbar */
@@ -31,14 +23,6 @@
     align-items: center;
     margin: auto;
 }
-
-/*[data-testId="stVerticalBlock"] div:nth-of-type(10) {*/
-/*    width: 852px;*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*    margin: auto;*/
-/*}*/
 
 [data-testId="stFormSubmitButton"] button {
     padding: 12px 30px;

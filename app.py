@@ -8,6 +8,7 @@ from scripts.config import CANVAS
 from scripts.utils import show_canvas_info, read_video, read_markdown, \
     redraw_after_refresh, convert_df, redraw_export_btn
 from streamlit import session_state
+from streamlit_lottie import st_lottie
 gc.enable()
 
 
@@ -26,6 +27,15 @@ def info():
         st.info("""The project is in progress, we trained the model with a few images of rats,
         so it would be inaccurate frequently, but we update it periodically.
         If you have data that could be helpful, please contact us at raffo.kalandadze@gmail.com""")
+
+
+def body_part_form():
+    with st.sidebar:
+        options = ['Nose', 'Left eye', 'Right eye', "Tail start", "Tail end"]
+        option_widget = st.selectbox('Select a body part to include in the calculation 📍',
+                                     options)
+
+    return options.index(option_widget)
 
 
 def user_input_form(file):
@@ -70,6 +80,11 @@ def export_form():
         # About
         st.markdown(read_markdown("docs/about.rst"), unsafe_allow_html=True)
 
+        st_lottie("https://assets4.lottiefiles.com/packages/lf20_Qi6u1JDCoL.json",
+                  height=200,
+                  width=200,
+                  key="mouse_animation")
+
     return group_type_text, series_text, export_analysis_btn, analysis_df, export_btn_placeholder
 
 
@@ -81,6 +96,7 @@ def main():
     drawing_mode = st.sidebar.selectbox("Drawing tool: 🖼", ("rect", "circle", "transform"))
     # create UI to uploading video
     file = st.sidebar.file_uploader("Upload video: 💾", type=["mp4"])
+    body_part_idx = body_part_form()
     example_btn, show_tracked_video_btn, show_report_btn, start_btn = user_input_form(file)
     group_type_text, series_text, export_analysis_btn, analysis_df, export_btn_placeholder = export_form()
 
@@ -112,7 +128,7 @@ def main():
             st.warning("add at least one segment on canvas")  # if the user did not add the segment at all
         else:
             pipeline = Pipeline(video_params, objects, first_image, show_tracked_video_btn, show_report_btn, analysis_df)
-            pipeline.run(video)
+            pipeline.run(video, body_part_idx)
             redraw_export_btn(export_btn_placeholder, group_type_text, series_text)
 
     # redraw widgets if app refreshed
