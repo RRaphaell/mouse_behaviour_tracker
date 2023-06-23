@@ -8,7 +8,6 @@ from pathlib import Path
 import streamlit as st
 import PIL
 from PIL import Image
-from st_aggrid import AgGrid  # for editable dataframe
 from scripts.config import COLOR_PALETTE
 from typing import Tuple
 from streamlit_elements import elements
@@ -35,7 +34,7 @@ def redraw_after_refresh(show_tracked_video_btn, show_report_btn):
                 report.n_crossing(crossing_df)
 
 
-# @st.cache
+# @st.cache_data
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv().encode('utf-8')
@@ -131,17 +130,11 @@ def show_canvas_info(canvas_result) -> pd.DataFrame:
                 st.dataframe(objects)
             else:
                 # add segment key column which would be weights of each segment
-                objects.insert(loc=0, column='segment key', value=range(len(objects)))
+                objects.insert(loc=0, column='segment key', value=list(map(str, range(len(objects)))))
                 add_df_rect_coords(objects)
 
-                # change dataframe configuration as editable only "segment key" column
-                visible_columns = ["type", "left", "top", "width", "height", "scaleX", "scaleY", "angle", "radius"]
-                grid_options = {"columnDefs": [{"field": "segment key", "editable": True}]}
-                grid_options["columnDefs"] += [{"field": c, "editable": False} for c in visible_columns]
+                objects = st.data_editor(objects, disabled=objects.columns.difference(["segment key"]))
 
-                # streamlit doesn't have interactive dataframe so using agrid dataframe.
-                grid_return = AgGrid(objects, grid_options, theme='streamlit')
-                objects = grid_return["data"]
     return objects
 
 
