@@ -93,7 +93,7 @@ def main():
 
     info()
     # Specify canvas parameters in application
-    drawing_mode = st.sidebar.selectbox("Drawing tool: 🖼", ("rect", "circle", "transform"))
+    drawing_mode = st.sidebar.selectbox("Drawing tool: 🎨", ("rect", "circle", "transform"))
     # create UI to uploading video
     file = st.sidebar.file_uploader("Upload video: 💾", type=["mp4"])
     body_part_idx = body_part_form()
